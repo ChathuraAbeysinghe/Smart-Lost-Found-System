@@ -29,8 +29,8 @@ html {
 
 body {
   font-family: 'Inter', 'Outfit', system-ui, sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: theme('colors.system.surface');
+  color: theme('colors.system.text');
   min-height: 100vh;
   overflow-x: hidden;
 }

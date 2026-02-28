@@ -50,6 +50,13 @@ module.exports = {
                     success: '#22C55E',
                     white: '#FFFFFF',
                 },
+                system: {
+                    primary: '#1A1A64',   // Primary Blue
+                    accent: '#F06414',    // Accent Orange
+                    gold: '#D4AF37',      // Gold Accent
+                    surface: '#F5F6FA',   // Light Surface
+                    text: '#111827',      // Dark Text
+                },
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

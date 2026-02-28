@@ -1,13 +1,16 @@
 'use client'
 import { useState, useEffect } from 'react'
-import Navbar from '@/components/Navbar'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { BarChart3, Users, Shield, Package, Search, AlertTriangle, TrendingUp, Clock, Star } from 'lucide-react'
+import {
+    LayoutDashboard, FileText, ShieldAlert, Activity,
+    ArrowUpRight, AlertTriangle, ShieldCheck, Clock,
+    Search, LogOut
+} from 'lucide-react'
 
-export default function AdminDashboard() {
-    const { user, loading: authLoading, isAdmin } = useAuth()
+export default function AdminCommandCenter() {
+    const { user, loading: authLoading, isAdmin, logout } = useAuth()
     const router = useRouter()
     const [stats, setStats] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -21,87 +24,222 @@ export default function AdminDashboard() {
             .finally(() => setLoading(false))
     }, [user])
 
-    if (authLoading) return <div className="page-bg min-h-screen"><Navbar /></div>
+    if (authLoading) return <div className="min-h-screen" style={{ backgroundColor: '#0B0F19' }} />
     if (!user || !isAdmin) { router.push('/login'); return null }
 
-    const statCards = stats ? [
-        { label: 'Total Lost Items', value: stats.totalLost || 0, icon: Search, color: '#fca5a5' },
-        { label: 'Total Found Items', value: stats.totalFound || 0, icon: Package, color: '#6ee7b7' },
-        { label: 'Total Claims', value: stats.totalClaims || 0, icon: Shield, color: '#a5b4fc' },
-        { label: 'Pending Review', value: stats.pendingClaims || 0, icon: Clock, color: '#fcd34d' },
-        { label: 'Total Users', value: stats.totalUsers || 0, icon: Users, color: '#c4b5fd' },
-        { label: 'Restricted Users', value: stats.restrictedUsers || 0, icon: AlertTriangle, color: '#fca5a5' },
-    ] : []
+    const statCards = [
+        { label: 'Total Claims', value: stats?.totalClaims || 0, color: '#1A1A64', glow: 'rgba(26,26,100,0.5)', icon: FileText, change: '+12%' },
+        { label: 'Resolved', value: stats?.totalFound || 0, color: '#D4AF37', glow: 'rgba(212,175,55,0.4)', icon: ShieldCheck, change: '+5%' },
+        { label: 'Pending Review', value: stats?.pendingClaims || 0, color: '#F06414', glow: 'rgba(240,100,20,0.4)', icon: Clock, change: '-2%' },
+        { label: 'Fraud Alerts', value: stats?.restrictedUsers || 0, color: '#ef4444', glow: 'rgba(239,68,68,0.4)', icon: AlertTriangle, change: '+1 alert' },
+    ]
 
     return (
-        <div className="page-bg min-h-screen"><Navbar />
-            <div className="orb w-72 h-72 top-0 right-0 opacity-10" style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.5) 0%, transparent 70%)' }} />
+        <div className="min-h-screen flex" style={{ backgroundColor: '#0B0F19', color: '#F5F6FA', position: 'relative', overflow: 'hidden' }}>
 
-            <div className="max-w-7xl mx-auto px-4 pt-24 pb-16">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                            <BarChart3 size={24} className="text-indigo-400" /> Admin Dashboard
-                        </h1>
-                        <p className="text-white/50 text-sm mt-1">System overview and management</p>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs"
-                        style={{ background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)', color: '#c4b5fd' }}>
-                        <Star size={12} /> Admin Control Panel
-                    </div>
-                </div>
+            {/* Command Center Ambient Glowing Orbs */}
+            <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-20 blur-[150px] pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse, #1A1A64 0%, transparent 70%)' }} />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-15 blur-[120px] pointer-events-none"
+                style={{ background: 'radial-gradient(circle, #F06414 0%, transparent 70%)' }} />
 
-                {/* Stats Grid */}
-                {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-                        {[...Array(6)].map((_, i) => <div key={i} className="glass-card h-24 animate-pulse" style={{ opacity: 0.4 }} />)}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-                        {statCards.map(({ label, value, icon: Icon, color }) => (
-                            <div key={label} className="glass-card-hover p-5 text-center space-y-2">
-                                <Icon size={20} className="mx-auto" style={{ color }} />
-                                <div className="text-2xl font-black text-white">{value}</div>
-                                <div className="text-white/40 text-xs uppercase tracking-wide">{label}</div>
+            {/* Premium Frosted Sidebar */}
+            <aside className="w-64 h-screen hidden lg:flex flex-col justify-between border-r sticky top-0 z-50 shrink-0"
+                style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(40px)', borderColor: 'rgba(255, 255, 255, 0.05)' }}>
+                <div>
+                    {/* Header */}
+                    <div className="p-6 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center border"
+                                style={{ background: 'rgba(26, 26, 100, 0.4)', borderColor: 'rgba(26, 26, 100, 0.8)' }}>
+                                <ShieldAlert size={20} className="text-white drop-shadow-md" />
                             </div>
-                        ))}
+                            <div>
+                                <h1 className="font-bold text-white tracking-wide">Command<br />Center</h1>
+                            </div>
+                        </div>
                     </div>
-                )}
 
-                {/* Quick actions */}
-                <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    <Link href="/admin/claims" className="glass-card-hover p-6 space-y-3 group">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                            style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)' }}>
-                            <Shield size={22} className="text-indigo-400" />
-                        </div>
-                        <h3 className="text-white font-semibold">Review Claims</h3>
-                        <p className="text-white/50 text-xs">Approve, reject, or request more info on claims with AI scores</p>
-                        <span className="text-indigo-400 text-xs group-hover:text-indigo-300 transition-colors">Go to Claims →</span>
-                    </Link>
-
-                    <Link href="/admin/users" className="glass-card-hover p-6 space-y-3 group">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                            style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
-                            <Users size={22} className="text-cyan-400" />
-                        </div>
-                        <h3 className="text-white font-semibold">Manage Users</h3>
-                        <p className="text-white/50 text-xs">Warn, restrict, or unrestrict user accounts</p>
-                        <span className="text-cyan-400 text-xs group-hover:text-cyan-300 transition-colors">Go to Users →</span>
-                    </Link>
-
-                    <Link href="/admin/audit" className="glass-card-hover p-6 space-y-3 group">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                            style={{ background: 'rgba(236,72,153,0.15)', border: '1px solid rgba(236,72,153,0.3)' }}>
-                            <TrendingUp size={22} className="text-pink-400" />
-                        </div>
-                        <h3 className="text-white font-semibold">Audit Logs</h3>
-                        <p className="text-white/50 text-xs">View all admin actions with full traceability</p>
-                        <span className="text-pink-400 text-xs group-hover:text-pink-300 transition-colors">View Logs →</span>
-                    </Link>
+                    {/* Navigation */}
+                    <nav className="p-4 space-y-2">
+                        {[
+                            { name: 'Overview', icon: LayoutDashboard, active: true },
+                            { name: 'Claim Management', icon: FileText, href: '/admin/claims' },
+                            { name: 'User Moderation', icon: ShieldAlert, href: '/admin/users' },
+                            { name: 'Analytics Data', icon: Activity, href: '/admin/audit' },
+                        ].map((item, i) => (
+                            <Link key={i} href={item.href || '#'}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${item.active ? '' : 'hover:bg-white/5'}`}
+                                style={item.active ? { background: 'rgba(212, 175, 55, 0.15)', borderColor: 'rgba(212, 175, 55, 0.3)', border: '1px solid' } : { border: '1px solid transparent' }}>
+                                <item.icon size={18} style={{ color: item.active ? '#D4AF37' : 'rgba(245, 246, 250, 0.5)' }} className="group-hover:text-white transition-colors" />
+                                <span className={`text-sm font-semibold transition-colors ${item.active ? 'text-white' : 'text-white/50 group-hover:text-white'}`}>{item.name}</span>
+                            </Link>
+                        ))}
+                    </nav>
                 </div>
-            </div>
+
+                <div className="p-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}>
+                    <div className="flex items-center gap-3 mb-4 px-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1A1A64] to-[#F06414] flex items-center justify-center font-bold text-xs ring-2 ring-transparent">
+                            A
+                        </div>
+                        <div className="text-sm">
+                            <p className="font-bold text-white leading-tight">Admin System</p>
+                            <p className="text-[10px] text-[#D4AF37] uppercase tracking-wider font-bold">Authorized</p>
+                        </div>
+                    </div>
+                    <button onClick={logout} className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors hover:bg-white/5 text-white/50 hover:text-white">
+                        <LogOut size={16} /> Sign Out
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content Workspace */}
+            <main className="flex-1 w-full min-h-screen relative z-10 p-6 md:p-8 overflow-y-auto">
+                {/* Mobile Top Bar */}
+                <div className="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                        <ShieldAlert size={24} className="text-[#D4AF37]" />
+                        <span className="font-bold text-lg text-white">Admin Network</span>
+                    </div>
+                </div>
+
+                {/* Top Metrics Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                    {loading ? (
+                        [...Array(4)].map((_, i) => <div key={i} className="h-32 rounded-2xl border animate-pulse" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }} />)
+                    ) : (
+                        statCards.map((card, idx) => (
+                            <div key={idx} className="rounded-2xl p-6 border relative overflow-hidden group transition-transform hover:-translate-y-1"
+                                style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(30px)', borderColor: 'rgba(255, 255, 255, 0.05)' }}>
+                                <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] opacity-30 pointer-events-none transition-opacity group-hover:opacity-50"
+                                    style={{ background: card.color }} />
+
+                                <div className="flex justify-between items-start mb-4 relative z-10">
+                                    <div className="p-2.5 rounded-lg border shadow-lg" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                                        <card.icon size={20} color={card.color} />
+                                    </div>
+                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-white/5 border border-white/10 flex items-center gap-1">
+                                        <ArrowUpRight size={12} color={card.color} /> {card.change}
+                                    </span>
+                                </div>
+                                <h3 className="text-3xl font-black text-white drop-shadow-md mb-1 relative z-10">{card.value}</h3>
+                                <p className="text-xs font-bold uppercase tracking-wider relative z-10" style={{ color: 'rgba(245, 246, 250, 0.5)' }}>{card.label}</p>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-8">
+                    {/* Central Area Chart */}
+                    <div className="rounded-3xl border flex flex-col p-8"
+                        style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(30px)', borderColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <div className="flex justify-between items-center mb-8 border-b pb-4" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                            <h2 className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
+                                <Activity size={18} className="text-[#1A1A64] drop-shadow-[0_0_8px_rgba(26,26,100,1)]" /> Lost vs. Found Trajectory
+                            </h2>
+                            <span className="text-xs font-semibold px-3 py-1 bg-white/5 rounded text-white/60">Last 30 Days</span>
+                        </div>
+
+                        <div className="flex-1 min-h-[300px] w-full relative flex items-end justify-between px-2 pb-8 pt-10"
+                            style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.01) 0%, transparent 100%)' }}>
+                            {/* Abstract Chart Representation Visual */}
+                            <div className="absolute bottom-8 left-0 w-full h-[200px] pointer-events-none">
+                                <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
+                                    <path d="M0,200 L0,150 C100,100 200,180 300,120 C400,60 500,140 600,90 C700,40 800,80 800,80 L800,200 Z"
+                                        fill="url(#gradient-blue)" stroke="#1A1A64" strokeWidth="3" className="drop-shadow-[0_0_10px_rgba(26,26,100,0.8)]" />
+                                    <path d="M0,200 L0,100 C150,140 250,60 350,110 C450,160 550,50 650,100 C750,150 800,30 800,30 L800,200 Z"
+                                        fill="url(#gradient-orange)" stroke="#F06414" strokeWidth="3" className="drop-shadow-[0_0_10px_rgba(240,100,20,0.8)]" />
+                                    <defs>
+                                        <linearGradient id="gradient-blue" x1="0" x2="0" y1="0" y2="1">
+                                            <stop offset="0%" stopColor="rgba(26,26,100,0.4)" />
+                                            <stop offset="100%" stopColor="transparent" />
+                                        </linearGradient>
+                                        <linearGradient id="gradient-orange" x1="0" x2="0" y1="0" y2="1">
+                                            <stop offset="0%" stopColor="rgba(240,100,20,0.3)" />
+                                            <stop offset="100%" stopColor="transparent" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            {/* Grid Lines */}
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="absolute left-0 w-full border-t border-white/5" style={{ bottom: `${i * 20}%` }} />
+                            ))}
+                            <div className="w-full flex justify-between text-[10px] uppercase font-bold text-white/30 absolute bottom-0 left-0 px-4">
+                                <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-6 mt-8 justify-center">
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-[#1A1A64] shadow-[0_0_8px_rgba(26,26,100,0.8)]" />
+                                <span className="text-xs font-semibold text-white/70">Lost Items Reported</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-[#F06414] shadow-[0_0_8px_rgba(240,100,20,0.8)]" />
+                                <span className="text-xs font-semibold text-white/70">Found Items Logged</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column (Activity Feed) */}
+                    <div className="rounded-3xl border p-6 overflow-hidden flex flex-col"
+                        style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(30px)', borderColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <h2 className="text-lg font-bold text-white tracking-wide flex items-center gap-2 mb-6">
+                            <Clock size={16} className="text-[#D4AF37] animate-pulse" /> Live Activity Feed
+                        </h2>
+
+                        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                            {/* Standard Feed Items */}
+                            <div className="p-4 rounded-xl border bg-white/5 hover:bg-white/10 transition-colors" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[10px] font-bold text-[#F06414] uppercase tracking-wider">High Match Verified</span>
+                                    <span className="text-[10px] font-medium text-white/40">2 mins ago</span>
+                                </div>
+                                <p className="text-xs text-white/80 font-medium leading-relaxed">
+                                    AI confirmed a <strong className="text-white">98% match</strong> between 'MacBook Pro Space Gray' and Claim #B8F2A.
+                                </p>
+                            </div>
+
+                            <div className="p-4 rounded-xl border bg-white/5 hover:bg-white/10 transition-colors" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">New Submission</span>
+                                    <span className="text-[10px] font-medium text-white/40">14 mins ago</span>
+                                </div>
+                                <p className="text-xs text-white/80 font-medium leading-relaxed">
+                                    User IT23844292 reported finding a set of Campus Keys near the Science Block.
+                                </p>
+                            </div>
+
+                            <div className="p-4 rounded-xl border bg-[#ef4444]/10 hover:bg-[#ef4444]/20 transition-colors" style={{ borderColor: 'rgba(239,68,68,0.3)' }}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[10px] font-bold text-[#ef4444] uppercase tracking-wider">Security Alert</span>
+                                    <span className="text-[10px] font-medium text-[#ef4444]/60">1 hour ago</span>
+                                </div>
+                                <p className="text-xs text-[#ef4444] font-medium leading-relaxed">
+                                    Suspicious repeated claiming patterns detected from Student ID IT12345678. Account temporarily flagged for review.
+                                </p>
+                            </div>
+
+                            <div className="p-4 rounded-xl border bg-white/5 hover:bg-white/10 transition-colors" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider">Claim Reunited</span>
+                                    <span className="text-[10px] font-medium text-white/40">3 hours ago</span>
+                                </div>
+                                <p className="text-xs text-white/80 font-medium leading-relaxed">
+                                    Apple AirPods Pro returned successfully to verified owner. Case closed.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button className="w-full mt-4 py-2 text-xs font-bold uppercase tracking-widest border-t border-white/10 text-white/40 hover:text-white transition-colors">
+                            Load historical feed
+                        </button>
+                    </div>
+                </div>
+            </main>
         </div>
     )
 }

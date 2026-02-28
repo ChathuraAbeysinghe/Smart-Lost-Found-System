@@ -7,7 +7,7 @@ import AIScoreDisplay from '@/components/ui/AIScoreDisplay'
 import { Send, ArrowLeft, Shield, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
-export default function NewClaimPage() {
+function ClaimFormContent() {
     const { user, loading: authLoading, isRestricted } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -188,5 +188,15 @@ export default function NewClaimPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+import { Suspense } from 'react'
+
+export default function NewClaimPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen page-bg flex items-center justify-center text-white">Loading...</div>}>
+            <ClaimFormContent />
+        </Suspense>
     )
 }

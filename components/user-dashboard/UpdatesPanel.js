@@ -4,83 +4,93 @@ export default function UpdatesPanel({ updates = [] }) {
     return (
         <div className="flex flex-col gap-6">
             {/* Updates Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-campus-border">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-campus-text flex items-center gap-2">
-                        <Bell size={18} className="text-campus-muted" /> Updates
+            <div className="rounded-3xl p-6 shadow-xl border relative overflow-hidden"
+                style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(30px)', borderColor: 'rgba(255, 255, 255, 0.05)' }}>
+                <div className="flex items-center justify-between mb-8 pb-4 border-b" style={{ borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+                    <h3 className="text-xl font-black flex items-center gap-3 tracking-wide text-white">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 border border-white/10">
+                            <Bell size={16} style={{ color: '#D4AF37' }} />
+                        </div>
+                        Updates
                     </h3>
-                    <span className="bg-campus-soft/10 text-campus-primary text-xs font-bold px-2.5 py-1 rounded-full">
+                    <span className="text-[10px] uppercase font-black tracking-widest px-3 py-1.5 rounded-full"
+                        style={{ background: 'rgba(240, 100, 20, 0.1)', color: '#F06414', border: '1px solid rgba(240, 100, 20, 0.3)' }}>
                         3 New
                     </span>
                 </div>
 
                 <div className="space-y-6">
-                    {/* Placeholder Updates - ideally mapped from props */}
-
                     {/* Item Found Update */}
-                    <div className="flex gap-4 group cursor-pointer">
-                        <div className="mt-1 shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                            <CheckCircle2 size={16} strokeWidth={2.5} />
+                    <div className="flex gap-4 group cursor-pointer p-3 -mx-3 rounded-2xl hover:bg-white/5 transition-colors">
+                        <div className="mt-1 shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 shadow-[0_0_15px_rgba(26,26,100,0.5)] border"
+                            style={{ background: 'rgba(26, 26, 100, 0.2)', borderColor: 'rgba(26, 26, 100, 0.5)', color: '#4ade80' }}>
+                            <CheckCircle2 size={18} strokeWidth={2.5} />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-start justify-between gap-2">
-                                <h4 className="font-semibold text-sm text-campus-text">Item Found!</h4>
-                                <span className="text-[11px] text-campus-muted whitespace-nowrap">10 min ago</span>
+                                <h4 className="font-bold text-sm tracking-wide text-white">Item Found!</h4>
+                                <span className="text-[10px] font-bold tracking-wider uppercase" style={{ color: 'rgba(245, 246, 250, 0.4)' }}>10m ago</span>
                             </div>
-                            <p className="text-xs text-campus-muted mt-1 leading-relaxed">
-                                A match was found for your "Black Backpack".
+                            <p className="text-xs mt-1 leading-relaxed font-medium" style={{ color: 'rgba(245, 246, 250, 0.6)' }}>
+                                A strong AI match was found for your "MacBook Pro".
                             </p>
                         </div>
                     </div>
 
                     {/* New Message Update */}
-                    <div className="flex gap-4 group cursor-pointer">
-                        <div className="mt-1 shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                            <MessageCircle size={16} strokeWidth={2.5} />
+                    <div className="flex gap-4 group cursor-pointer p-3 -mx-3 rounded-2xl hover:bg-white/5 transition-colors">
+                        <div className="mt-1 shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 shadow-[0_0_15px_rgba(26,26,100,0.5)] border"
+                            style={{ background: 'rgba(26, 26, 100, 0.2)', borderColor: 'rgba(26, 26, 100, 0.5)', color: '#60a5fa' }}>
+                            <MessageCircle size={18} strokeWidth={2.5} />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-start justify-between gap-2">
-                                <h4 className="font-semibold text-sm text-campus-text">New Message</h4>
-                                <span className="text-[11px] text-campus-muted whitespace-nowrap">1 hour ago</span>
+                                <h4 className="font-bold text-sm tracking-wide text-white">New Comment</h4>
+                                <span className="text-[10px] font-bold tracking-wider uppercase" style={{ color: 'rgba(245, 246, 250, 0.4)' }}>1h ago</span>
                             </div>
-                            <p className="text-xs text-campus-muted mt-1 leading-relaxed">
-                                Admin: "Can you confirm the serial number?"
+                            <p className="text-xs mt-1 leading-relaxed font-medium" style={{ color: 'rgba(245, 246, 250, 0.6)' }}>
+                                Security Desk: "Please confirm the serial code..."
                             </p>
                         </div>
                     </div>
 
                     {/* Claim Expiring Update */}
-                    <div className="flex gap-4 group cursor-pointer">
-                        <div className="mt-1 shrink-0 w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
-                            <AlertCircle size={16} strokeWidth={2.5} />
+                    <div className="flex gap-4 group cursor-pointer p-3 -mx-3 rounded-2xl hover:bg-white/5 transition-colors">
+                        <div className="mt-1 shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 shadow-[0_0_15px_rgba(240,100,20,0.3)] border"
+                            style={{ background: 'rgba(240, 100, 20, 0.1)', borderColor: 'rgba(240, 100, 20, 0.4)', color: '#F06414' }}>
+                            <AlertCircle size={18} strokeWidth={2.5} />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-start justify-between gap-2">
-                                <h4 className="font-semibold text-sm text-campus-text">Claim Expiring</h4>
-                                <span className="text-[11px] text-campus-muted whitespace-nowrap">5 hours ago</span>
+                                <h4 className="font-bold text-sm tracking-wide text-white">Claim Expiring</h4>
+                                <span className="text-[10px] font-bold tracking-wider uppercase" style={{ color: 'rgba(245, 246, 250, 0.4)' }}>5h ago</span>
                             </div>
-                            <p className="text-xs text-campus-muted mt-1 leading-relaxed">
-                                Please pick up your ID card by tomorrow.
+                            <p className="text-xs mt-1 leading-relaxed font-medium" style={{ color: 'rgba(245, 246, 250, 0.6)' }}>
+                                Please pick up your ID card by tomorrow 5 PM.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-8 text-center border-t border-campus-border pt-4">
-                    <button className="text-xs font-semibold text-campus-muted hover:text-campus-text transition-colors">
+                <div className="mt-6 text-center pt-5 border-t" style={{ borderTopColor: 'rgba(255,255,255,0.05)' }}>
+                    <button className="text-xs font-bold uppercase tracking-widest transition-colors hover:text-white" style={{ color: 'rgba(245, 246, 250, 0.5)' }}>
                         Mark all as read
                     </button>
                 </div>
             </div>
 
             {/* Need Help Card */}
-            <div className="bg-[#FAF7F2] rounded-2xl p-6 border border-[#EAE3DA]">
-                <h3 className="font-bold text-[#8A5A44] mb-2 text-lg">Need Help?</h3>
-                <p className="text-[#A27B62] text-sm mb-4 leading-relaxed">
-                    Can't find what you're looking for? Visit the main security office or call the hotline.
+            <div className="rounded-3xl p-6 border relative overflow-hidden"
+                style={{ background: 'rgba(26, 26, 100, 0.2)', borderColor: 'rgba(26, 26, 100, 0.6)', backdropFilter: 'blur(20px)' }}>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#F06414]/10 blur-3xl rounded-full" />
+                <h3 className="font-black text-xl mb-3 tracking-wide text-white relative z-10">Security Help</h3>
+                <p className="text-sm font-medium mb-6 leading-relaxed relative z-10" style={{ color: 'rgba(245, 246, 250, 0.7)' }}>
+                    Visit the main security office or contact support for advanced claim inquiries.
                 </p>
-                <button className="w-full bg-white border border-[#EAE3DA] text-[#8A5A44] font-semibold text-sm py-2.5 rounded-xl hover:bg-[#FDFBF9] hover:shadow-sm transition-all shadow-sm">
-                    Contact Support
+                <button className="w-full relative group overflow-hidden border rounded-xl py-3 text-sm font-bold uppercase tracking-wider text-white z-10 transition-shadow hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                    style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    Open Support Desk
                 </button>
             </div>
         </div>

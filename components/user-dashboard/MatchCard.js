@@ -2,63 +2,72 @@ import { MapPin, CalendarClock, Tag } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MatchCard({ id, imageUrl, matchScore, timeAgo, title, location, category }) {
-
-    // Determine badge color based on score
-    const getBadgeStyle = (score) => {
-        if (score >= 90) return 'bg-campus-success.10 text-campus-success border-campus-success/30';
-        if (score >= 70) return 'bg-campus-warning/10 text-campus-warning border-campus-warning/30';
-        return 'bg-orange-100 text-orange-600 border-orange-200';
-    };
-
-    const badgeStyle = getBadgeStyle(matchScore);
-
     return (
-        <div className="bg-white rounded-[16px] overflow-hidden border border-campus-border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer group relative">
+        <div className="rounded-[20px] overflow-hidden border transition-all duration-300 flex flex-col cursor-pointer group relative hover:-translate-y-2"
+            style={{
+                background: 'rgba(255, 255, 255, 0.02)',
+                backdropFilter: 'blur(30px)',
+                borderColor: 'rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
+            }}>
 
             {/* Image Area */}
-            <div className="h-40 w-full relative bg-slate-100 overflow-hidden">
+            <div className="h-44 w-full relative overflow-hidden" style={{ background: 'rgba(0,0,0,0.3)' }}>
                 {imageUrl ? (
-                    <img src={imageUrl} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={imageUrl} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90" />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-400">
+                    <div className="w-full h-full bg-gradient-to-br from-[#1A1A64]/30 to-black flex items-center justify-center text-white/30 font-semibold tracking-widest uppercase text-xs">
                         No Image
                     </div>
                 )}
 
                 {/* Gradient Overlay for Readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(11, 15, 25, 1) 0%, transparent 60%)' }} />
 
-                {/* Match Badge */}
-                <div className={`absolute top-3 right-3 px-2 py-1 rounded-md text-xs font-bold border backdrop-blur-md shadow-sm opacity-90 ${badgeStyle}`}>
+                {/* AI Match Glow Badge */}
+                <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg text-sm font-black tracking-wider border backdrop-blur-xl shadow-lg transform group-hover:scale-105 transition-transform"
+                    style={{
+                        background: 'rgba(212, 175, 55, 0.1)',
+                        color: '#D4AF37',
+                        borderColor: 'rgba(212, 175, 55, 0.4)',
+                        boxShadow: '0 0 20px rgba(212, 175, 55, 0.2)'
+                    }}>
                     {matchScore}% Match
                 </div>
 
                 {/* Time Ago Label */}
-                <div className="absolute bottom-3 left-3 text-white text-xs font-medium flex items-center gap-1 drop-shadow-md">
-                    <CalendarClock size={12} /> {timeAgo}
+                <div className="absolute bottom-4 left-4 text-xs font-bold tracking-wide flex items-center gap-1.5 drop-shadow-md" style={{ color: 'rgba(245, 246, 250, 0.8)' }}>
+                    <CalendarClock size={14} /> {timeAgo}
                 </div>
             </div>
 
             {/* Content Area */}
-            <div className="p-4 flex flex-col flex-1">
-                <h3 className="font-bold text-campus-text text-lg mb-2 line-clamp-1">{title}</h3>
+            <div className="p-5 flex flex-col flex-1 relative z-10">
+                <h3 className="font-bold text-xl mb-3 line-clamp-1 drop-shadow-sm text-white group-hover:text-[#F06414] transition-colors">{title}</h3>
 
-                <div className="flex items-start gap-2 text-campus-muted text-sm mb-3">
-                    <MapPin size={16} className="shrink-0 mt-0.5" />
-                    <span className="line-clamp-2">{location}</span>
+                <div className="flex items-start gap-2 text-sm mb-4 font-medium" style={{ color: 'rgba(245, 246, 250, 0.6)' }}>
+                    <MapPin size={16} className="shrink-0 mt-0.5 opacity-70" />
+                    <span className="line-clamp-2 leading-relaxed">{location}</span>
                 </div>
 
-                <div className="mt-auto pt-2 border-t border-campus-border border-dashed flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                        <Tag size={12} /> {category}
+                <div className="mt-auto pt-4 border-t flex items-center justify-between gap-3" style={{ borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border"
+                        style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(245, 246, 250, 0.7)' }}>
+                        <Tag size={12} className="opacity-60" /> {category}
                     </span>
 
                     <Link
                         href={`/matches/${id}`}
-                        className="px-4 py-1.5 bg-white border border-campus-border rounded-lg text-sm font-semibold text-campus-primary hover:bg-campus-primary hover:text-white transition-colors"
+                        className="px-5 py-2 rounded-xl text-sm font-bold transition-all relative overflow-hidden border group/btn flex items-center justify-center shrink-0"
+                        style={{
+                            background: 'rgba(26, 26, 100, 0.2)',
+                            color: 'white',
+                            borderColor: 'rgba(26, 26, 100, 0.6)'
+                        }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        Review Match
+                        <div className="absolute inset-0 bg-[#1A1A64] opacity-0 group-hover/btn:opacity-100 transition-opacity z-0" />
+                        <span className="relative z-10 drop-shadow-md">Review Matrix</span>
                     </Link>
                 </div>
             </div>
