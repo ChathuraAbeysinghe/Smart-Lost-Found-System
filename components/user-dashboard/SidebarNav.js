@@ -10,7 +10,7 @@ export default function SidebarNav() {
 
     const navItems = [
         { name: 'Dashboard', href: '/user-dashboard', icon: Home },
-        { name: 'My Claims', href: '/claims', icon: Search },
+        { name: 'My Claims', href: '/user-dashboard/claims', icon: Search },
         { name: 'Potential Matches', href: '/matches', icon: Star },
         { name: 'Settings', href: '/user-dashboard/settings', icon: Settings },
     ];

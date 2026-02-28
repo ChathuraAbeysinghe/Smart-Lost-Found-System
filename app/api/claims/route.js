@@ -15,11 +15,18 @@ export async function GET(request) {
         await connectDB()
         const filter = decoded.role === 'admin' ? {} : { claimantId: decoded.id }
         const claims = await ClaimRequest.find(filter)
-            .populate('lostItemId', 'title category status')
-            .populate('foundItemId', 'title category status')
+            .populate('lostItemId', 'title category status imageUrl')
+            .populate('foundItemId', 'title category status locationFound photoUrl dateFound')
             .sort({ createdAt: -1 })
             .lean()
-        return NextResponse.json({ claims })
+
+        // Strip AI-internal fields for non-admin users
+        const safeClaims = decoded.role === 'admin' ? claims : claims.map(c => {
+            const { aiMatchScore, aiRiskScore, aiBreakdown, aiSuggestedDecision, ...safe } = c
+            return safe
+        })
+
+        return NextResponse.json({ claims: safeClaims })
     } catch {
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
@@ -58,8 +65,8 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Items not found' }, { status: 404 })
         }
 
-        // Run AI matching
-        const aiResult = computeMatchScore(lostItem, foundItem, {
+        // Run AI matching (MiniLM-L6-v2 semantic engine)
+        const aiResult = await computeMatchScore(lostItem, foundItem, {
             ownershipExplanation, hiddenDetails, exactColorBrand
         })
 
