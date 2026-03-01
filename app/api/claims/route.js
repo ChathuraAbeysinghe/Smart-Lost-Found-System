@@ -46,8 +46,8 @@ export async function POST(request) {
         const { lostItemId, foundItemId, ownershipExplanation, hiddenDetails,
             exactColorBrand, dateLost, proofUrl, pickupPreference } = body
 
-        if (!lostItemId || !foundItemId || !ownershipExplanation) {
-            return NextResponse.json({ error: 'Required fields missing' }, { status: 400 })
+        if (!foundItemId || !ownershipExplanation) {
+            return NextResponse.json({ error: 'Found item and ownership explanation are required' }, { status: 400 })
         }
 
         // Check for duplicate claim
@@ -60,12 +60,10 @@ export async function POST(request) {
             return NextResponse.json({ error: 'You already have an active claim for this item' }, { status: 409 })
         }
 
-        const [lostItem, foundItem] = await Promise.all([
-            LostItem.findById(lostItemId).lean(),
-            FoundItem.findById(foundItemId).lean(),
-        ])
-        if (!lostItem || !foundItem) {
-            return NextResponse.json({ error: 'Items not found' }, { status: 404 })
+        // Fetch the found item (always required)
+        const foundItem = await FoundItem.findById(foundItemId).lean()
+        if (!foundItem) {
+            return NextResponse.json({ error: 'Found item not found' }, { status: 404 })
         }
 
         // Block the person who posted the found item from claiming it
@@ -75,21 +73,10 @@ export async function POST(request) {
             }, { status: 403 })
         }
 
-        // Run AI matching (MiniLM-L6-v2 semantic engine)
-        const aiResult = await computeMatchScore(lostItem, foundItem, {
-            ownershipExplanation, hiddenDetails, exactColorBrand
-        })
-
-        // Server-side gate: only allow claims with AI score >= 75%
-        const CLAIM_THRESHOLD = 75
-        if (aiResult.matchScore < CLAIM_THRESHOLD) {
-            return NextResponse.json({
-                error: 'This item does not meet the minimum AI match requirements to submit a claim.',
-            }, { status: 403 })
-        }
-
-        const claim = await ClaimRequest.create({
-            lostItemId, foundItemId,
+        // Build claim data
+        const claimData = {
+            foundItemId,
+            lostItemId: lostItemId || null,
             claimantId: decoded.id,
             claimantName: decoded.name || '',
             claimantEmail: decoded.email || '',
@@ -99,33 +86,56 @@ export async function POST(request) {
             dateLost: dateLost ? new Date(dateLost) : undefined,
             proofUrl: proofUrl || '',
             pickupPreference: pickupPreference || 'Campus Lost & Found Office',
-            status: 'ai_matched',
-            aiMatchScore: aiResult.matchScore,
-            aiRiskScore: aiResult.riskScore,
-            aiSuggestedDecision: aiResult.suggestedDecision,
-            aiBreakdown: aiResult.breakdown,
             trackingHistory: [
                 { status: 'Submitted', note: 'Claim submitted successfully', updatedBy: decoded.name },
-                { status: 'AI Matched', note: `AI Match Score: ${aiResult.matchScore}%`, updatedBy: 'AI Engine' },
             ],
-        })
+        }
+
+        // If a lost item is linked, run AI matching for admin intelligence (NOT gating)
+        if (lostItemId) {
+            const lostItem = await LostItem.findById(lostItemId).lean()
+            if (lostItem) {
+                const aiResult = await computeMatchScore(lostItem, foundItem, {
+                    ownershipExplanation, hiddenDetails, exactColorBrand
+                })
+                claimData.aiMatchScore = aiResult.matchScore
+                claimData.aiRiskScore = aiResult.riskScore
+                claimData.aiSuggestedDecision = aiResult.suggestedDecision
+                claimData.aiBreakdown = aiResult.breakdown
+                claimData.status = 'ai_matched'
+                claimData.trackingHistory.push({
+                    status: 'AI Matched', note: `AI Match Score: ${aiResult.matchScore}%`, updatedBy: 'AI Engine'
+                })
+            } else {
+                claimData.status = 'under_review'
+            }
+        } else {
+            // Direct claim without Lost Item — goes to admin review
+            claimData.status = 'under_review'
+            claimData.trackingHistory.push({
+                status: 'Pending Review', note: 'Direct claim — no linked lost item report. Awaiting admin review.', updatedBy: 'System'
+            })
+        }
+
+        const claim = await ClaimRequest.create(claimData)
 
         // Log to Audit Feed
+        const aiInfo = claimData.aiMatchScore ? ` AI Match: ${claimData.aiMatchScore}%.` : ' Direct claim (no AI match).'
         await AuditLog.create({
             adminName: 'System',
             action: 'NEW_CLAIM',
             targetType: 'ClaimRequest',
             targetId: claim._id,
-            details: `User ${decoded.name || decoded.email} submitted a claim for ${foundItem.title}. AI Match: ${aiResult.matchScore}%.`,
+            details: `User ${decoded.name || decoded.email} submitted a claim for ${foundItem.title}.${aiInfo}`,
         })
 
-        if (aiResult.matchScore >= 90) {
+        if (claimData.aiMatchScore >= 90) {
             await AuditLog.create({
                 adminName: 'AI Engine',
                 action: 'HIGH_MATCH_VERIFIED',
                 targetType: 'ClaimRequest',
                 targetId: claim._id,
-                details: `AI confirmed a near-perfect ${aiResult.matchScore}% match for Claim #${claim._id.toString().slice(-5).toUpperCase()}.`,
+                details: `AI confirmed a near-perfect ${claimData.aiMatchScore}% match for Claim #${claim._id.toString().slice(-5).toUpperCase()}.`,
             })
         }
 

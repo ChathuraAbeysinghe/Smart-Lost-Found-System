@@ -92,7 +92,7 @@ export async function POST(request) {
         let matches = []
         try {
             const unclaimedFound = await FoundItem.find({ status: 'unclaimed' }).lean()
-            const MATCH_THRESHOLD = 40
+            const MATCH_THRESHOLD = 75
 
             for (const foundItem of unclaimedFound) {
                 const result = await computeMatchScore(item.toObject(), foundItem, {})

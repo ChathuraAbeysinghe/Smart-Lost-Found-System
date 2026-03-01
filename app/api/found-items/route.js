@@ -103,7 +103,7 @@ export async function POST(request) {
         // === AI Reverse-Scan: Notify owners of matching lost items ===
         try {
             const pendingLost = await LostItem.find({ status: 'pending' }).lean()
-            const MATCH_THRESHOLD = 40
+            const MATCH_THRESHOLD = 75
 
             for (const lostItem of pendingLost) {
                 const result = await computeMatchScore(lostItem, item.toObject(), {})
