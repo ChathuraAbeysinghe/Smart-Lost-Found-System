@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import { useAuth } from '@/context/AuthContext'
-import AIScoreDisplay from '@/components/ui/AIScoreDisplay'
-import { Send, ArrowLeft, Shield, AlertTriangle } from 'lucide-react'
+import { Send, ArrowLeft, Shield, AlertTriangle, Package, MapPin, Tag, Calendar, Loader2, CheckCircle2, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
 
 function ClaimFormContent() {
@@ -13,10 +12,12 @@ function ClaimFormContent() {
     const searchParams = useSearchParams()
     const foundItemId = searchParams.get('foundItemId') || ''
 
+    const [foundItem, setFoundItem] = useState(null)
     const [lostItems, setLostItems] = useState([])
     const [loading, setLoading] = useState(false)
+    const [fetching, setFetching] = useState(true)
     const [error, setError] = useState('')
-    const [aiResult, setAiResult] = useState(null)
+    const [success, setSuccess] = useState(false)
     const [form, setForm] = useState({
         lostItemId: '', foundItemId,
         ownershipExplanation: '', hiddenDetails: '',
@@ -26,14 +27,24 @@ function ClaimFormContent() {
 
     const change = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
-    // Fetch user's lost items for selection
+    // Fetch the found item details for preview
+    useEffect(() => {
+        if (!foundItemId) { setFetching(false); return }
+        fetch(`/api/found-items/${foundItemId}`, { credentials: 'include' })
+            .then(r => r.json())
+            .then(d => setFoundItem(d.item || null))
+            .catch(() => { })
+            .finally(() => setFetching(false))
+    }, [foundItemId])
+
+    // Fetch user's lost items for optional linking
     useEffect(() => {
         if (!user) return
-        fetch('/api/lost-items?page=1', { credentials: 'include' })
+        fetch('/api/lost-items?page=1&limit=50', { credentials: 'include' })
             .then(r => r.json())
             .then(d => {
-                const myItems = (d.items || []).filter(i => i.postedBy === user.id)
-                setLostItems(d.items || [])
+                const myItems = (d.items || []).filter(i => i.postedBy?.toString() === user.id || i.submittedBy?.toString() === user.id)
+                setLostItems(myItems)
             }).catch(() => { })
     }, [user])
 
@@ -42,16 +53,18 @@ function ClaimFormContent() {
         setError('')
         setLoading(true)
         try {
+            const payload = { ...form }
+            if (!payload.lostItemId) delete payload.lostItemId // Don't send empty string
             const res = await fetch('/api/claims', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify(payload),
                 credentials: 'include',
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Failed to submit claim')
-            setAiResult(data.aiResult)
-            setTimeout(() => router.push('/user-dashboard'), 3000)
+            setSuccess(true)
+            setTimeout(() => router.push('/user-dashboard'), 2500)
         } catch (err) {
             setError(err.message)
         } finally {
@@ -59,7 +72,13 @@ function ClaimFormContent() {
         }
     }
 
-    if (authLoading) return <div className="page-bg min-h-screen"><Navbar /></div>
+    if (authLoading || fetching) return (
+        <div className="page-bg min-h-screen"><Navbar />
+            <div className="flex items-center justify-center pt-40">
+                <Loader2 className="animate-spin text-white/30" size={36} />
+            </div>
+        </div>
+    )
     if (!user) return (
         <div className="page-bg min-h-screen"><Navbar />
             <div className="max-w-md mx-auto pt-32 px-4 text-center">
@@ -81,16 +100,14 @@ function ClaimFormContent() {
         </div>
     )
 
-    // Show success with AI score
-    if (aiResult) return (
+    if (success) return (
         <div className="page-bg min-h-screen"><Navbar />
             <div className="max-w-lg mx-auto pt-32 px-4 animate-slide-up">
-                <div className="glass-card p-8 text-center space-y-6">
-                    <div className="text-5xl">✅</div>
-                    <h2 className="text-white font-bold text-xl">Claim Submitted Successfully!</h2>
-                    <p className="text-white/50 text-sm">AI has analyzed your claim. Admin will review it shortly.</p>
-                    <AIScoreDisplay matchScore={aiResult.matchScore} riskScore={aiResult.riskScore} breakdown={aiResult.breakdown} suggestion={aiResult.suggestedDecision} />
-                    <p className="text-white/40 text-xs">Redirecting to dashboard in 3 seconds...</p>
+                <div className="glass-card p-8 text-center space-y-4">
+                    <CheckCircle2 size={48} className="mx-auto" style={{ color: '#4ade80' }} />
+                    <h2 className="text-white font-bold text-xl">Claim Submitted!</h2>
+                    <p className="text-white/50 text-sm">Your claim has been submitted for admin review. You'll be notified of the result.</p>
+                    <p className="text-white/40 text-xs">Redirecting to dashboard...</p>
                 </div>
             </div>
         </div>
@@ -109,7 +126,7 @@ function ClaimFormContent() {
                     </div>
                 </div>
 
-                {/* Warning about fake claims */}
+                {/* Warning */}
                 <div className="mb-6 p-4 rounded-xl flex items-start gap-3"
                     style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
                     <AlertTriangle size={18} className="text-yellow-400 mt-0.5 shrink-0" />
@@ -119,16 +136,55 @@ function ClaimFormContent() {
                     </div>
                 </div>
 
+                {/* Found Item Preview Card */}
+                {foundItem && (
+                    <div className="mb-6 p-4 rounded-xl flex items-center gap-4"
+                        style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)' }}>
+                        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0"
+                            style={{ background: 'rgba(16,185,129,0.1)' }}>
+                            {foundItem.photoUrl ? (
+                                <img src={foundItem.photoUrl} alt={foundItem.title} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <Package size={24} className="text-emerald-400/30" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: '#6ee7b7' }}>Claiming This Item</p>
+                            <h3 className="text-white font-semibold text-sm truncate">{foundItem.title}</h3>
+                            <div className="flex items-center gap-3 mt-1">
+                                {foundItem.category && (
+                                    <span className="flex items-center gap-1 text-[10px] text-white/40">
+                                        <Tag size={9} /> {foundItem.category}
+                                    </span>
+                                )}
+                                {foundItem.dateFound && (
+                                    <span className="flex items-center gap-1 text-[10px] text-white/40">
+                                        <Calendar size={9} /> Found {new Date(foundItem.dateFound).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="glass-card p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Select lost item */}
-                        <div className="space-y-1.5">
-                            <label className="text-xs text-white/60 uppercase tracking-wide">Select Your Lost Item Report *</label>
-                            <select className="glass-select" value={form.lostItemId} onChange={change('lostItemId')} required>
-                                <option value="">Choose your lost item report</option>
-                                {lostItems.map(i => <option key={i._id} value={i._id}>{i.title} ({i.category})</option>)}
-                            </select>
-                        </div>
+
+                        {/* Optional: Link a Lost Item */}
+                        {lostItems.length > 0 && (
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-white/60 uppercase tracking-wide flex items-center gap-1.5">
+                                    <LinkIcon size={10} /> Link a Lost Report (optional)
+                                </label>
+                                <select className="glass-select" value={form.lostItemId} onChange={change('lostItemId')}>
+                                    <option value="">Skip — I haven't posted a lost report</option>
+                                    {lostItems.map(i => <option key={i._id} value={i._id}>{i.title} ({i.category})</option>)}
+                                </select>
+                                <p className="text-[10px] text-white/30">Linking a lost report helps AI verify your claim faster, but is not required.</p>
+                            </div>
+                        )}
 
                         {foundItemId && (
                             <input type="hidden" value={foundItemId} />
@@ -137,7 +193,7 @@ function ClaimFormContent() {
                         <div className="space-y-1.5">
                             <label className="text-xs text-white/60 uppercase tracking-wide">Ownership Explanation *</label>
                             <textarea className="glass-input min-h-[120px] resize-y"
-                                placeholder="Explain how you can prove this item is yours. Be as detailed as possible..."
+                                placeholder="Explain how you can prove this item is yours. Be as detailed as possible — describe unique marks, contents, purchase details..."
                                 value={form.ownershipExplanation} onChange={change('ownershipExplanation')} required />
                         </div>
 
@@ -155,7 +211,7 @@ function ClaimFormContent() {
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs text-white/60 uppercase tracking-wide">Date Lost</label>
-                                <input type="date" className="glass-input" value={form.dateLost} onChange={change('dateLost')} />
+                                <input type="date" className="glass-input" style={{ colorScheme: 'dark' }} value={form.dateLost} onChange={change('dateLost')} />
                             </div>
                         </div>
 
@@ -181,8 +237,8 @@ function ClaimFormContent() {
                         )}
 
                         <button type="submit" disabled={loading} className="btn-glass-primary w-full justify-center py-3 text-sm font-semibold">
-                            <Shield size={16} />
-                            {loading ? 'Submitting & Running AI Analysis...' : 'Submit Claim for AI Verification'}
+                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
+                            {loading ? 'Submitting Claim...' : 'Submit Claim for Review'}
                         </button>
                     </form>
                 </div>

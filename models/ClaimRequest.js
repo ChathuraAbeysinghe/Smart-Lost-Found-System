@@ -9,7 +9,7 @@ const TrackingEventSchema = new mongoose.Schema({
 
 const ClaimRequestSchema = new mongoose.Schema({
     // References
-    lostItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'LostItem', required: true },
+    lostItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'LostItem', default: null },
     foundItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'FoundItem', required: true },
     claimantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     claimantName: { type: String, default: '' },
