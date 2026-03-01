@@ -23,11 +23,12 @@ export async function GET(request, { params }) {
         }
 
         // Public view: hide sensitive details to prevent fake claims
-        const { keywords, color, brand, condition, submittedByEmail, submittedBy, ...publicItem } = item
+        const { keywords, color, brand, condition, submittedByEmail, submittedBy, locationFound, description, ...publicItem } = item
         return NextResponse.json({
             item: {
                 ...publicItem,
-                description: item.description?.substring(0, 80) + (item.description?.length > 80 ? '... [Details hidden for security]' : ''),
+                description: '[Hidden for security] Please provide specific details in your claim request.',
+                locationFound: '[Hidden]',
                 isPrivate: true,
             }
         })

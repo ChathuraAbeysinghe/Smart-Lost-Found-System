@@ -94,11 +94,11 @@ export default function FoundItemDetailPage() {
                                 { icon: MapPin, label: 'Location Found', value: item.locationFound },
                                 { icon: Calendar, label: 'Date Found', value: item.dateFound ? new Date(item.dateFound).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' },
                                 { icon: Tag, label: 'Category', value: item.category },
-                                { icon: Shield, label: 'Condition', value: item.condition || 'Good' },
+                                { icon: Shield, label: 'Condition', value: item.condition || '[Hidden]' },
                             ].map(({ icon: Icon, label, value }) => (
                                 <div key={label} className="glass-card p-3 flex items-center gap-3">
                                     <Icon size={14} className="text-emerald-400 shrink-0" />
-                                    <div><div className="text-white/40 text-xs">{label}</div><div className="text-white text-sm">{value}</div></div>
+                                    <div><div className="text-white/40 text-xs">{label}</div><div className={`text-sm ${value?.includes('[Hidden]') ? 'text-white/50 italic' : 'text-white'}`}>{value}</div></div>
                                 </div>
                             ))}
                         </div>

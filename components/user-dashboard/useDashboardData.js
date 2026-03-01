@@ -51,6 +51,7 @@ export default function useDashboardData(user) {
                         timeAgo: timeAgo(n.createdAt),
                         imageUrl: typeof found === 'object' ? found.photoUrl : '',
                         notificationId: n._id,
+                        lostItemId: typeof n.lostItemId === 'object' ? n.lostItemId?._id : n.lostItemId,
                     };
                 });
             setMatches(aiMatches);
