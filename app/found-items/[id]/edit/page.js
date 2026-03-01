@@ -1,25 +1,55 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import { useAuth } from '@/context/AuthContext'
-import { Send, ArrowLeft } from 'lucide-react'
+import { Save, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import ImageUpload from '@/components/forms/ImageUpload'
 
 const CATEGORIES = ['Electronics', 'Books', 'Clothing', 'Keys', 'ID Card', 'Bag', 'Jewelry', 'Sports', 'Other']
 const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Poor']
 
-export default function NewFoundItemPage() {
+export default function EditFoundItemPage() {
+    const { id } = useParams()
     const { user, loading: authLoading } = useAuth()
     const router = useRouter()
+    const [fetching, setFetching] = useState(true)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [success, setSuccess] = useState(false)
+    const [forbidden, setForbidden] = useState(false)
     const [form, setForm] = useState({
         title: '', category: '', description: '', keywords: '',
         color: '', brand: '', condition: 'Good',
         dateFound: '', locationFound: '', photoUrl: '',
     })
+
+    useEffect(() => {
+        if (!id) return
+        fetch(`/api/found-items/${id}`, { credentials: 'include' })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.item) { setForbidden(true); return }
+                const item = data.item
+                // Only owner can edit — check isPrivate flag (non-owners get stripped data)
+                if (item.isPrivate) { setForbidden(true); return }
+                setForm({
+                    title: item.title || '',
+                    category: item.category || '',
+                    description: item.description || '',
+                    keywords: Array.isArray(item.keywords) ? item.keywords.join(', ') : (item.keywords || ''),
+                    color: item.color || '',
+                    brand: item.brand || '',
+                    condition: item.condition || 'Good',
+                    dateFound: item.dateFound ? new Date(item.dateFound).toISOString().split('T')[0] : '',
+                    locationFound: item.locationFound || '',
+                    photoUrl: item.photoUrl || '',
+                })
+            })
+            .catch(() => setForbidden(true))
+            .finally(() => setFetching(false))
+    }, [id])
 
     const change = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
@@ -28,15 +58,16 @@ export default function NewFoundItemPage() {
         setError('')
         setLoading(true)
         try {
-            const res = await fetch('/api/found-items', {
-                method: 'POST',
+            const res = await fetch(`/api/found-items/${id}`, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
                 credentials: 'include',
             })
             const data = await res.json()
-            if (!res.ok) throw new Error(data.error || 'Failed to create report')
-            router.push('/found-items')
+            if (!res.ok) throw new Error(data.error || 'Failed to update')
+            setSuccess(true)
+            setTimeout(() => router.push('/found-items'), 1500)
         } catch (err) {
             setError(err.message)
         } finally {
@@ -44,22 +75,50 @@ export default function NewFoundItemPage() {
         }
     }
 
-    if (authLoading) return <div className="page-bg min-h-screen"><Navbar /></div>
-    if (!user) {
-        return (
-            <div className="page-bg min-h-screen">
-                <Navbar />
-                <div className="max-w-md mx-auto pt-32 px-4 text-center">
-                    <div className="glass-card p-12">
-                        <div className="text-5xl mb-4">🔒</div>
-                        <h2 className="text-white font-bold text-lg mb-2">Login Required</h2>
-                        <p className="text-white/50 text-sm mb-6">You must be logged in to report a found item.</p>
-                        <Link href="/login" className="btn-glass-primary">Sign In</Link>
-                    </div>
+    if (authLoading || fetching) return (
+        <div className="page-bg min-h-screen"><Navbar />
+            <div className="flex items-center justify-center pt-40">
+                <Loader2 className="animate-spin text-white/30" size={36} />
+            </div>
+        </div>
+    )
+
+    if (!user) return (
+        <div className="page-bg min-h-screen"><Navbar />
+            <div className="max-w-md mx-auto pt-32 px-4 text-center">
+                <div className="glass-card p-12">
+                    <div className="text-5xl mb-4">🔒</div>
+                    <h2 className="text-white font-bold text-lg mb-2">Login Required</h2>
+                    <Link href="/login" className="btn-glass-primary">Sign In</Link>
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
+
+    if (forbidden) return (
+        <div className="page-bg min-h-screen"><Navbar />
+            <div className="max-w-md mx-auto pt-32 px-4 text-center">
+                <div className="glass-card p-12">
+                    <div className="text-5xl mb-4">⛔</div>
+                    <h2 className="text-white font-bold text-lg mb-2">Access Denied</h2>
+                    <p className="text-white/50 text-sm mb-6">You can only edit your own posts within the 10-minute window.</p>
+                    <Link href="/found-items" className="btn-glass-primary">Back to Found Items</Link>
+                </div>
+            </div>
+        </div>
+    )
+
+    if (success) return (
+        <div className="page-bg min-h-screen"><Navbar />
+            <div className="max-w-md mx-auto pt-32 px-4 text-center">
+                <div className="glass-card p-12">
+                    <CheckCircle2 size={48} className="mx-auto mb-4" style={{ color: '#4ade80' }} />
+                    <h2 className="text-white font-bold text-lg mb-2">Updated Successfully!</h2>
+                    <p className="text-white/50 text-sm">Redirecting back to Found Items...</p>
+                </div>
+            </div>
+        </div>
+    )
 
     return (
         <div className="page-bg min-h-screen">
@@ -70,13 +129,14 @@ export default function NewFoundItemPage() {
                 <div className="flex items-center gap-3 mb-6">
                     <Link href="/found-items" className="btn-glass px-3 py-2"><ArrowLeft size={16} /></Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Report Found Item</h1>
-                        <p className="text-white/50 text-sm mt-0.5">Help return this item to its owner</p>
+                        <h1 className="text-2xl font-bold text-white">Edit Found Item</h1>
+                        <p className="text-white/50 text-sm mt-0.5">Update your found item report</p>
                     </div>
                 </div>
 
                 <div className="glass-card p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-xs text-white/60 uppercase tracking-wide">Item Title *</label>
@@ -121,7 +181,7 @@ export default function NewFoundItemPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-xs text-white/60 uppercase tracking-wide">Date Found *</label>
-                                <input type="date" className="glass-input" value={form.dateFound} onChange={change('dateFound')} required />
+                                <input type="date" className="glass-input" style={{ colorScheme: 'dark' }} value={form.dateFound} onChange={change('dateFound')} required />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs text-white/60 uppercase tracking-wide">Location Found *</label>
@@ -130,7 +190,7 @@ export default function NewFoundItemPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-xs text-white/60 uppercase tracking-wide">Actual Photo (optional)</label>
+                            <label className="text-xs text-white/60 uppercase tracking-wide">Photo (optional)</label>
                             <ImageUpload
                                 value={form.photoUrl}
                                 onChange={(url) => setForm(f => ({ ...f, photoUrl: url }))}
@@ -144,8 +204,8 @@ export default function NewFoundItemPage() {
                         )}
 
                         <button type="submit" disabled={loading} className="btn-glass-success w-full justify-center py-3 text-sm font-semibold">
-                            <Send size={16} />
-                            {loading ? 'Submitting Report...' : 'Submit Found Item Report'}
+                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                            {loading ? 'Saving Changes...' : 'Save Changes'}
                         </button>
                     </form>
                 </div>

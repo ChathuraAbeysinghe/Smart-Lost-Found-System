@@ -68,10 +68,25 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Items not found' }, { status: 404 })
         }
 
+        // Block the person who posted the found item from claiming it
+        if (foundItem.submittedBy?.toString() === decoded.id) {
+            return NextResponse.json({
+                error: 'You cannot claim an item that you reported as found.',
+            }, { status: 403 })
+        }
+
         // Run AI matching (MiniLM-L6-v2 semantic engine)
         const aiResult = await computeMatchScore(lostItem, foundItem, {
             ownershipExplanation, hiddenDetails, exactColorBrand
         })
+
+        // Server-side gate: only allow claims with AI score >= 75%
+        const CLAIM_THRESHOLD = 75
+        if (aiResult.matchScore < CLAIM_THRESHOLD) {
+            return NextResponse.json({
+                error: 'This item does not meet the minimum AI match requirements to submit a claim.',
+            }, { status: 403 })
+        }
 
         const claim = await ClaimRequest.create({
             lostItemId, foundItemId,
@@ -117,7 +132,7 @@ export async function POST(request) {
         // Update found item status
         await FoundItem.findByIdAndUpdate(foundItemId, { status: 'under_review' })
 
-        return NextResponse.json({ claim, aiResult }, { status: 201 })
+        return NextResponse.json({ claim }, { status: 201 })
     } catch (err) {
         console.error(err)
         return NextResponse.json({ error: 'Server error' }, { status: 500 })

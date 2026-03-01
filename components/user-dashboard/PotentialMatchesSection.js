@@ -31,6 +31,8 @@ export default function PotentialMatchesSection({ matches = [] }) {
                             matchScore={match.matchScore}
                             timeAgo={match.timeAgo || 'Recently'}
                             imageUrl={match.imageUrl}
+                            lostItemId={match.lostItemId}
+                            submittedBy={match.submittedBy}
                         />
                     ))}
                 </div>

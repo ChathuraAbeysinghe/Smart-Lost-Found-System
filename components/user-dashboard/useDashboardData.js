@@ -29,8 +29,17 @@ export default function useDashboardData(user) {
             setNotifications(allNotifs);
 
             // Build matches array from ai_match notifications (with populated foundItemId)
+            // Deduplicate by foundItemId to prevent duplicate match cards
+            const CLAIM_THRESHOLD = 75; // Only show matches ≥ 75% to users
+            const seenFoundIds = new Set();
             const aiMatches = allNotifs
-                .filter(n => n.type === 'ai_match' && n.foundItemId)
+                .filter(n => n.type === 'ai_match' && n.foundItemId && (n.matchScore || 0) >= CLAIM_THRESHOLD)
+                .filter(n => {
+                    const fid = typeof n.foundItemId === 'object' ? n.foundItemId._id : n.foundItemId;
+                    if (seenFoundIds.has(String(fid))) return false;
+                    seenFoundIds.add(String(fid));
+                    return true;
+                })
                 .map(n => {
                     const found = n.foundItemId;
                     return {
@@ -42,6 +51,8 @@ export default function useDashboardData(user) {
                         timeAgo: timeAgo(n.createdAt),
                         imageUrl: typeof found === 'object' ? found.photoUrl : '',
                         notificationId: n._id,
+                        lostItemId: typeof n.lostItemId === 'object' ? n.lostItemId?._id : n.lostItemId,
+                        submittedBy: typeof found === 'object' ? found.submittedBy : null,
                     };
                 });
             setMatches(aiMatches);
