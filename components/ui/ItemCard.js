@@ -72,6 +72,17 @@ export default function ItemCard({ item, type = 'lost', onDeleted }) {
     const [canEdit, setCanEdit] = useState(withinWindow)
     const [deleting, setDeleting] = useState(false)
     const [confirmDel, setConfirmDel] = useState(false)
+    const [pendingClaimCount, setPendingClaimCount] = useState(0)
+
+    // For found items: fetch pending claim count for badge
+    useEffect(() => {
+        if (type === 'found' && item._id) {
+            fetch(`/api/found-items/${item._id}/claim-count`)
+                .then(r => r.json())
+                .then(d => setPendingClaimCount(d.pendingClaimCount || 0))
+                .catch(() => { })
+        }
+    }, [type, item._id])
 
     const handleDelete = async (e) => {
         e.preventDefault(); e.stopPropagation()
@@ -118,6 +129,13 @@ export default function ItemCard({ item, type = 'lost', onDeleted }) {
                     )}
                     {/* Badges */}
                     <div className={isOwner ? "absolute bottom-3 right-3" : "absolute top-3 right-3"}><StatusBadge status={item.status} /></div>
+                    {/* Claim count badge for found items */}
+                    {type === 'found' && pendingClaimCount > 0 && (
+                        <div className="absolute bottom-3 left-3 flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full"
+                            style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.4)', backdropFilter: 'blur(8px)' }}>
+                            🎯 {pendingClaimCount} Pending
+                        </div>
+                    )}
                     <div className="absolute top-3 left-3">
                         <span className="badge text-xs"
                             style={{

@@ -8,7 +8,7 @@ import FoundItem from '@/models/FoundItem'
 import User from '@/models/User'
 import AuditLog from '@/models/AuditLog'
 import { verifyToken } from '@/lib/auth'
-import { computeMatchScore } from '@/lib/aiEngine'
+import { computeMatchScore, computeClaimMatchScore } from '@/lib/aiEngine'
 
 export async function GET(request) {
     try {
@@ -110,6 +110,16 @@ export async function POST(request) {
                 claimData.aiRiskScore = aiResult.riskScore
                 claimData.aiSuggestedDecision = aiResult.suggestedDecision
                 claimData.aiBreakdown = aiResult.breakdown
+                claimData.aiMatchLevel = aiResult.matchScore >= 70 ? 'HIGH' : aiResult.matchScore >= 40 ? 'MEDIUM' : aiResult.matchScore >= 20 ? 'LOW' : 'UNLIKELY'
+                claimData.aiMatchReasons = []
+                if (aiResult.breakdown.descriptionScore >= 50) claimData.aiMatchReasons.push('Description aligns with found item')
+                if (aiResult.breakdown.categoryScore >= 100) claimData.aiMatchReasons.push('Category matches exactly')
+                if (aiResult.breakdown.locationScore >= 50) claimData.aiMatchReasons.push('Location is close to where item was found')
+                if (aiResult.breakdown.dateScore >= 70) claimData.aiMatchReasons.push('Date lost aligns with date found')
+                claimData.aiRedFlags = []
+                if ((ownershipExplanation || '').trim().length < 50) claimData.aiRedFlags.push('Ownership explanation is very brief')
+                if (!(hiddenDetails || '').trim()) claimData.aiRedFlags.push('No hidden/identifying details provided')
+                claimData.claimType = 'matched'
                 claimData.status = 'ai_matched'
                 claimData.trackingHistory.push({
                     status: 'AI Matched', note: `AI Match Score: ${aiResult.matchScore}%`, updatedBy: 'AI Engine'
@@ -118,10 +128,25 @@ export async function POST(request) {
                 claimData.status = 'under_review'
             }
         } else {
-            // Direct claim without Lost Item — goes to admin review
+            // Direct claim without Lost Item — run AI using claim text as proxy
+            const aiResult = await computeClaimMatchScore({
+                ownershipExplanation, hiddenDetails, exactColorBrand,
+                dateLost, locationLost: body.locationLost || '',
+                category: body.category || '',
+            }, foundItem)
+            claimData.aiMatchScore = aiResult.matchScore
+            claimData.aiRiskScore = aiResult.riskScore
+            claimData.aiMatchLevel = aiResult.matchLevel
+            claimData.aiSuggestedDecision = aiResult.suggestedDecision
+            claimData.aiMatchReasons = aiResult.matchReasons
+            claimData.aiRedFlags = aiResult.redFlags
+            claimData.aiBreakdown = aiResult.breakdown
+            claimData.claimType = 'direct'
             claimData.status = 'under_review'
             claimData.trackingHistory.push({
-                status: 'Pending Review', note: 'Direct claim — no linked lost item report. Awaiting admin review.', updatedBy: 'System'
+                status: 'Pending Review',
+                note: `Direct claim — AI Score: ${aiResult.matchScore}% (${aiResult.matchLevel}). Awaiting admin review.`,
+                updatedBy: 'System'
             })
         }
 

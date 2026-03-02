@@ -56,7 +56,7 @@ export default function FoundItemDetailPage() {
                         </div>
 
                         {/* Claim button — only visible to other users, not the poster */}
-                        {user && item.status === 'unclaimed' && (
+                        {user && ['unclaimed', 'under_review'].includes(item.status) && (
                             item.submittedBy?.toString() === user.id ? (
                                 <div className="mt-4 p-3 rounded-xl text-xs text-center font-medium"
                                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(245,246,250,0.4)' }}>
