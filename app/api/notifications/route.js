@@ -18,7 +18,7 @@ export async function GET(request) {
             dismissed: false,
         })
             .populate('lostItemId', 'title category possibleLocation imageUrl')
-            .populate('foundItemId', 'title category locationFound photoUrl')
+            .populate('foundItemId', 'title category locationFound photoUrl submittedBy')
             .sort({ createdAt: -1 })
             .limit(20)
             .lean()
