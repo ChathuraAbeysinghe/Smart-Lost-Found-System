@@ -33,11 +33,14 @@ const ClaimRequestSchema = new mongoose.Schema({
     // AI Matching
     aiMatchScore: { type: Number, default: 0, min: 0, max: 100 },
     aiRiskScore: { type: Number, default: 0, min: 0, max: 100 },
+    aiMatchLevel: { type: String, enum: ['HIGH', 'MEDIUM', 'LOW', 'UNLIKELY', 'PENDING'], default: 'PENDING' },
     aiSuggestedDecision: {
         type: String,
         enum: ['approve', 'review', 'reject', 'pending'],
         default: 'pending',
     },
+    aiMatchReasons: [{ type: String }],
+    aiRedFlags: [{ type: String }],
     aiBreakdown: {
         descriptionScore: { type: Number, default: 0 },
         keywordScore: { type: Number, default: 0 },
@@ -45,6 +48,9 @@ const ClaimRequestSchema = new mongoose.Schema({
         dateScore: { type: Number, default: 0 },
         categoryScore: { type: Number, default: 0 },
     },
+
+    // Claim type: direct = browsed found items directly, matched = came via AI match notification
+    claimType: { type: String, enum: ['direct', 'matched'], default: 'direct' },
 
     // Admin actions
     adminNote: { type: String, default: '' },

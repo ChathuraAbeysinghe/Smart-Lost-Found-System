@@ -21,7 +21,7 @@ function ClaimFormContent() {
     const [form, setForm] = useState({
         lostItemId: '', foundItemId,
         ownershipExplanation: '', hiddenDetails: '',
-        exactColorBrand: '', dateLost: '', proofUrl: '',
+        exactColorBrand: '', dateLost: '', locationLost: '', proofUrl: '',
         pickupPreference: 'Campus Lost & Found Office',
     })
 
@@ -213,6 +213,13 @@ function ClaimFormContent() {
                                 <label className="text-xs text-white/60 uppercase tracking-wide">Date Lost</label>
                                 <input type="date" className="glass-input" style={{ colorScheme: 'dark' }} value={form.dateLost} onChange={change('dateLost')} />
                             </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs text-white/60 uppercase tracking-wide flex items-center gap-1.5">
+                                <MapPin size={10} /> Where did you lose it?
+                            </label>
+                            <input className="glass-input" placeholder="e.g. Library Block C, 2nd floor reading area" value={form.locationLost} onChange={change('locationLost')} />
                         </div>
 
                         <div className="space-y-1.5">

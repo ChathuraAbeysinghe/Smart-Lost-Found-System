@@ -13,28 +13,54 @@ export async function GET(request) {
         if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
         await connectDB()
-        const notifications = await Notification.find({
-            userId: decoded.id,
-            dismissed: false,
-        })
+
+        const { searchParams } = new URL(request.url)
+        const typeFilter = searchParams.get('type')
+
+        const baseFilter = { userId: decoded.id, dismissed: false }
+
+        // Map UI filter tabs to notification types
+        const typeMap = {
+            claims: ['claim_update', 'claim_approved', 'claim_rejected', 'claim_info_requested'],
+            ai_matches: ['ai_match'],
+            warnings: ['warning', 'restriction', 'unrestricted'],
+            system: ['system', 'system_update', 'important_alert', 'action_required', 'appeal_approved', 'appeal_rejected'],
+        }
+
+        const query = { ...baseFilter }
+        if (typeFilter && typeMap[typeFilter]) {
+            query.type = { $in: typeMap[typeFilter] }
+        }
+
+        const notifications = await Notification.find(query)
             .populate('lostItemId', 'title category possibleLocation imageUrl')
             .populate('foundItemId', 'title category locationFound photoUrl submittedBy')
             .sort({ createdAt: -1 })
-            .limit(20)
+            .limit(50)
             .lean()
 
         const unreadCount = await Notification.countDocuments({
-            userId: decoded.id,
-            read: false,
-            dismissed: false,
+            userId: decoded.id, read: false, dismissed: false,
         })
 
-        return NextResponse.json({ notifications, unreadCount })
+        // Category counts for filter tabs
+        const [claimsCount, aiCount, warningsCount, systemCount] = await Promise.all([
+            Notification.countDocuments({ ...baseFilter, type: { $in: typeMap.claims } }),
+            Notification.countDocuments({ ...baseFilter, type: { $in: typeMap.ai_matches } }),
+            Notification.countDocuments({ ...baseFilter, type: { $in: typeMap.warnings } }),
+            Notification.countDocuments({ ...baseFilter, type: { $in: typeMap.system } }),
+        ])
+
+        return NextResponse.json({
+            notifications, unreadCount,
+            counts: { claims: claimsCount, ai_matches: aiCount, warnings: warningsCount, system: systemCount, all: notifications.length },
+        })
     } catch (err) {
         console.error('[Notifications GET]', err)
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 }
+
 
 // PATCH /api/notifications — Mark notifications as read or dismissed
 export async function PATCH(request) {

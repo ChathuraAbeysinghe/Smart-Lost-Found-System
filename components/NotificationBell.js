@@ -233,10 +233,10 @@ export default function NotificationBell() {
                     {notifications.length > 0 && (
                         <div className="px-5 py-3 border-t text-center"
                             style={{ borderTopColor: 'rgba(255,255,255,0.06)' }}>
-                            <Link href="/user-dashboard" onClick={() => setOpen(false)}
+                            <Link href="/notifications" onClick={() => setOpen(false)}
                                 className="text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-white"
                                 style={{ color: 'rgba(245, 246, 250, 0.5)' }}>
-                                View All in Dashboard
+                                View All Notifications
                             </Link>
                         </div>
                     )}
