@@ -21,10 +21,10 @@ export default function LostItemDetailPage() {
             .finally(() => setLoading(false))
     }, [id])
 
-    if (loading) return <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar /><div className="pt-32 text-center text-[#1C2A59] font-medium">Loading details...</div></div>
+    if (loading) return <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar /><div className="pt-32 text-center text-[#1C2A59] font-medium">Loading details...</div></div>
 
     if (!item) return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar />
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar />
             <div className="max-w-md mx-auto pt-32 px-4 text-center">
                 <div className="bg-white p-12 rounded border border-gray-200 shadow-sm"><div className="text-5xl mb-4 text-[#008489]">😕</div><h2 className="text-[#1C2A59] font-bold mb-2">Item Not Found</h2>
                     <Link href="/lost-items" className="inline-block mt-4 px-6 py-2.5 bg-[#F0A500] text-[#1C2A59] font-bold rounded hover:bg-[#d69300] transition-colors">Back to Lost Items</Link>
@@ -34,7 +34,7 @@ export default function LostItemDetailPage() {
     )
 
     return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar />
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar />
             <div className="max-w-4xl mx-auto px-4 pt-10 pb-16">
                 <Link href="/lost-items" className="inline-flex items-center gap-2 text-[#3E4A56] hover:text-[#1C2A59] text-sm font-semibold mb-6 transition-colors">
                     <ArrowLeft size={16} /> Back to Lost Items Directory

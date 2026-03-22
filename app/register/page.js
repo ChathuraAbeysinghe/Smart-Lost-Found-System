@@ -38,7 +38,7 @@ export default function RegisterPage() {
     const labelClass = "text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1 block"
 
     return (
-        <div className="bg-[#F4F5F7] min-h-screen flex items-center justify-center px-4 py-12 font-['Lexend']">
+        <div className="bg-[#F4F5F7] min-h-screen flex items-center justify-center px-4 py-12 font-sans">
             <div className="w-full max-w-lg animate-slide-up">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 bg-white border-2 border-[#1C2A59] shadow-sm">

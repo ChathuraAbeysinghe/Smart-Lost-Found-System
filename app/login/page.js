@@ -33,7 +33,7 @@ export default function LoginPage() {
     const labelClass = "text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1 block"
 
     return (
-        <div className="bg-[#F4F5F7] min-h-screen flex items-center justify-center px-4 font-['Lexend']">
+        <div className="bg-[#F4F5F7] min-h-screen flex items-center justify-center px-4 font-sans">
             <div className="w-full max-w-md animate-slide-up">
                 {/* Logo */}
                 <div className="text-center mb-8">

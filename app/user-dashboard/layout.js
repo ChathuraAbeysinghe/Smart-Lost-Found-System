@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function DashboardLayout({ children }) {
     return (
-        <div className="min-h-screen flex font-['Lexend']" style={{ backgroundColor: '#F4F5F7', color: '#1C2A59', position: 'relative', overflow: 'hidden' }}>
+        <div className="min-h-screen flex font-sans" style={{ backgroundColor: '#F4F5F7', color: '#1C2A59', position: 'relative', overflow: 'hidden' }}>
             {/* Sidebar Navigation */}
             <SidebarNav />
 

@@ -73,14 +73,14 @@ function ClaimFormContent() {
     }
 
     if (authLoading || fetching) return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar />
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar />
             <div className="flex items-center justify-center pt-40">
                 <Loader2 className="animate-spin text-[#1C2A59]/30" size={36} />
             </div>
         </div>
     )
     if (!user) return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar />
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar />
             <div className="max-w-md mx-auto pt-32 px-4 text-center">
                 <div className="bg-white p-12 rounded border border-gray-200 shadow-sm"><div className="text-5xl mb-4 text-[#F0A500]">🔒</div><h2 className="text-[#1C2A59] font-bold text-xl mb-2">Login Required</h2>
                     <Link href="/login" className="inline-block px-6 py-2.5 bg-[#1C2A59] text-white font-bold rounded hover:bg-[#1a254d] transition-colors mt-4">Sign In</Link>
@@ -90,7 +90,7 @@ function ClaimFormContent() {
     )
 
     if (isRestricted) return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar />
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar />
             <div className="max-w-md mx-auto pt-32 px-4 text-center">
                 <div className="bg-white p-12 rounded border border-gray-200 shadow-sm"><div className="text-5xl mb-4">⛔</div>
                     <h2 className="text-red-600 font-bold mb-2">Account Restricted</h2>
@@ -101,7 +101,7 @@ function ClaimFormContent() {
     )
 
     if (success) return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar />
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar />
             <div className="max-w-lg mx-auto pt-32 px-4 animate-slide-up">
                 <div className="bg-white p-12 rounded border border-gray-200 shadow-sm text-center space-y-4">
                     <CheckCircle2 size={48} className="mx-auto" style={{ color: '#008489' }} />
@@ -117,7 +117,7 @@ function ClaimFormContent() {
     const labelClass = "text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1 block flex items-center gap-1.5"
 
     return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar />
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar />
 
             <div className="max-w-2xl mx-auto px-4 pt-10 pb-16">
                 <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-200">

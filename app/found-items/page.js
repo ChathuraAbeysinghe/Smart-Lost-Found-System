@@ -38,7 +38,7 @@ export default function FoundItemsPage() {
     const clearFilters = () => { setFilters({ q: '', category: '', location: '' }); setPage(1) }
 
     return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20">
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20">
             <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 lg:px-8 mt-4">

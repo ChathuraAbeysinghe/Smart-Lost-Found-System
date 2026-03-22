@@ -54,10 +54,10 @@ export default function NewLostItemPage() {
         }
     }
 
-    if (authLoading) return <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20"><Navbar /></div>
+    if (authLoading) return <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20"><Navbar /></div>
     if (!user) {
         return (
-            <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20">
+            <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20">
                 <Navbar />
                 <div className="max-w-md mx-auto pt-32 px-4 text-center">
                     <div className="bg-white p-12 rounded border border-gray-200 shadow-sm">
@@ -73,7 +73,7 @@ export default function NewLostItemPage() {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20">
+            <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20">
                 <Navbar />
                 <div className="max-w-md mx-auto pt-32 px-4 text-center">
                     <div className="bg-white p-12 rounded border border-gray-200 shadow-sm">
@@ -90,7 +90,7 @@ export default function NewLostItemPage() {
     const labelClass = "text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1 block"
 
     return (
-        <div className="min-h-screen bg-[#F4F5F7] font-['Lexend'] pb-20 pt-20">
+        <div className="min-h-screen bg-[#F4F5F7] font-sans pb-20 pt-20">
             <Navbar />
 
             <div className="max-w-2xl mx-auto px-4 pt-10 pb-16">
