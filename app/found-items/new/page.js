@@ -18,18 +18,41 @@ export default function NewFoundItemPage() {
     const [form, setForm] = useState({
         title: '', category: '', description: '', keywords: '',
         color: '', brand: '', condition: 'Good',
-        dateFound: '', locationFound: '', photoUrl: '',
+        dateFound: '', timeFound: '', locationFound: '', photoUrl: '',
     })
 
     const change = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
     const today = new Date().toISOString().split('T')[0]
 
+    const getCurrentTime = () => {
+        const n = new Date()
+        return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`
+    }
+
+    const handleTimeChange = (e) => {
+        const val = e.target.value
+        if (form.dateFound === today && val > getCurrentTime()) {
+            setError('⏱ Cannot select a future time for today.')
+            setForm(f => ({ ...f, timeFound: '' }))
+            return
+        }
+        setError('')
+        setForm(f => ({ ...f, timeFound: val }))
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
-        if (form.dateFound > today) {
+        const now = new Date()
+        const todayStr = now.toISOString().split('T')[0]
+        const currentTimeStr = now.toTimeString().slice(0, 5)
+        if (form.dateFound > todayStr) {
             setError('Date Found cannot be a future date.')
+            return
+        }
+        if (form.dateFound === todayStr && form.timeFound && form.timeFound > currentTimeStr) {
+            setError('Time Found cannot be in the future.')
             return
         }
         setLoading(true)
@@ -126,16 +149,22 @@ export default function NewFoundItemPage() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                             <div>
                                 <label className={labelClass}>Date Found <span className="text-red-500">*</span></label>
                                 <input type="date" className={inputClass} value={form.dateFound} onChange={change('dateFound')} max={today} required />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Time Found</label>
+                                <input type="time" className={inputClass} value={form.timeFound} onChange={handleTimeChange} />
+                                {form.dateFound === today && <p className="text-[10px] text-[#F0A500] mt-1 font-bold">⏱ Only past & current time allowed for today</p>}
                             </div>
                             <div>
                                 <label className={labelClass}>Location Found <span className="text-red-500">*</span></label>
                                 <input className={inputClass} placeholder="e.g. Cafeteria B" value={form.locationFound} onChange={change('locationFound')} required />
                             </div>
                         </div>
+
 
                         <div>
                             <label className={labelClass}>Actual Photo (optional)</label>

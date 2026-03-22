@@ -21,7 +21,7 @@ function ClaimFormContent() {
     const [form, setForm] = useState({
         lostItemId: '', foundItemId,
         ownershipExplanation: '', hiddenDetails: '',
-        exactColorBrand: '', dateLost: '', locationLost: '', proofUrl: '',
+        exactColorBrand: '', dateLost: '', timeLost: '', locationLost: '', proofUrl: '',
         pickupPreference: 'Campus Lost & Found Office',
     })
 
@@ -48,9 +48,38 @@ function ClaimFormContent() {
             }).catch(() => { })
     }, [user])
 
+    const today = new Date().toISOString().split('T')[0]
+
+    const getCurrentTime = () => {
+        const n = new Date()
+        return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`
+    }
+
+    const handleTimeChange = (e) => {
+        const val = e.target.value
+        if (form.dateLost === today && val > getCurrentTime()) {
+            setError('⏱ Cannot select a future time for today.')
+            setForm(f => ({ ...f, timeLost: '' }))
+            return
+        }
+        setError('')
+        setForm(f => ({ ...f, timeLost: val }))
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
+        const now = new Date()
+        const todayStr = now.toISOString().split('T')[0]
+        const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+        if (form.dateLost && form.dateLost > todayStr) {
+            setError('Date Lost cannot be a future date.')
+            return
+        }
+        if (form.dateLost === todayStr && form.timeLost && form.timeLost > currentTimeStr) {
+            setError('Time Lost cannot be in the future.')
+            return
+        }
         setLoading(true)
         try {
             const payload = { ...form }
@@ -204,14 +233,19 @@ function ClaimFormContent() {
                                 value={form.hiddenDetails} onChange={change('hiddenDetails')} />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                             <div>
                                 <label className={labelClass}>Exact Color / Brand</label>
                                 <input className={inputClass} placeholder="e.g. Deep Blue, Apple iPhone 14 Pro" value={form.exactColorBrand} onChange={change('exactColorBrand')} />
                             </div>
                             <div>
                                 <label className={labelClass}>Date Lost</label>
-                                <input type="date" className={inputClass} value={form.dateLost} onChange={change('dateLost')} />
+                                <input type="date" className={inputClass} value={form.dateLost} onChange={change('dateLost')} max={today} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Time Lost</label>
+                                <input type="time" className={inputClass} value={form.timeLost} onChange={handleTimeChange} />
+                                {form.dateLost === today && <p className="text-[10px] text-[#F0A500] mt-1 font-bold">⏱ Only past & current time allowed for today</p>}
                             </div>
                         </div>
 

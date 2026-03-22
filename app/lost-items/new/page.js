@@ -34,6 +34,22 @@ export default function NewLostItemPage() {
 
     const today = new Date().toISOString().split('T')[0]
 
+    const getCurrentTime = () => {
+        const n = new Date()
+        return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`
+    }
+
+    const handleTimeChange = (e) => {
+        const val = e.target.value
+        if (form.dateLost === today && val > getCurrentTime()) {
+            setError('⏱ Cannot select a future time for today.')
+            setForm(f => ({ ...f, timeRange: '' }))
+            return
+        }
+        setError('')
+        setForm(f => ({ ...f, timeRange: val }))
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
@@ -185,20 +201,19 @@ export default function NewLostItemPage() {
                                 <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Location & Time</span>
                             </div>
 
-                            {/* Date & Time Range */}
+                            {/* Date & Time */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div>
                                     <label className={labelClass}>Date Lost <span className="text-red-500">*</span></label>
                                     <input type="date" className={inputClass} value={form.dateLost} onChange={change('dateLost')} max={today} required />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Approximate Time</label>
-                                    <select className={inputClass} value={form.timeRange} onChange={change('timeRange')}>
-                                        <option value="">Select time range</option>
-                                        {TIME_RANGES.map(t => <option key={t} value={t}>{t}</option>)}
-                                    </select>
+                                    <label className={labelClass}>Approximate Time Lost</label>
+                                    <input type="time" className={inputClass} value={form.timeRange} onChange={handleTimeChange} />
+                                    {form.dateLost === today && <p className="text-[10px] text-[#F0A500] mt-1 font-bold">⏱ Only past & current time allowed for today</p>}
                                 </div>
                             </div>
+
 
                             {/* Location */}
                             <div className="mt-5">
