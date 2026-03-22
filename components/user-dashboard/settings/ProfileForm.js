@@ -44,37 +44,28 @@ export default function ProfileForm({ user }) {
         }
     };
 
-    const inputClass = "w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/30 outline-none transition-all duration-300 focus:ring-2";
+    const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-300 bg-[#F4F5F7] text-sm text-[#1C2A59] placeholder-gray-400 outline-none transition-all duration-300 focus:bg-white focus:ring-2 focus:ring-[#008489]/50 focus:border-[#008489]";
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             {/* Toast Notification */}
             {toast && (
-                <div className={`flex items-center gap-3 p-4 rounded-xl text-sm animate-slide-up ${toast.type === 'success' ? 'text-green-300' : 'text-red-300'}`}
-                    style={{
-                        background: toast.type === 'success' ? 'rgba(74, 222, 128, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        border: `1px solid ${toast.type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-                    }}>
+                <div className={`flex items-center gap-3 p-4 rounded-xl text-sm animate-slide-up ${toast.type === 'success' ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-700 bg-red-50 border border-red-200'}`}>
                     {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
                     {toast.message}
                 </div>
             )}
 
             {/* Personal Information */}
-            <fieldset className="p-6 rounded-[20px] space-y-5"
-                style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                }}>
-                <legend className="text-xs font-bold uppercase tracking-[0.2em] px-2" style={{ color: 'rgba(245, 246, 250, 0.5)' }}>
+            <fieldset className="p-6 rounded-[20px] space-y-5 bg-white border border-gray-200 shadow-sm">
+                <legend className="text-xs font-bold uppercase tracking-[0.2em] px-2 text-[#3E4A56]">
                     Personal Information
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                        <label className="text-xs text-white/60 uppercase tracking-wide font-medium">Full Name *</label>
+                        <label className="text-xs text-[#1C2A59] uppercase tracking-wide font-bold">Full Name <span className="text-red-500">*</span></label>
                         <input
                             className={inputClass}
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', focusRing: '#F06414' }}
                             placeholder="John Doe"
                             value={form.name}
                             onChange={change('name')}
@@ -82,11 +73,10 @@ export default function ProfileForm({ user }) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-xs text-white/60 uppercase tracking-wide font-medium">Email *</label>
+                        <label className="text-xs text-[#1C2A59] uppercase tracking-wide font-bold">Email <span className="text-red-500">*</span></label>
                         <input
                             type="email"
                             className={inputClass}
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                             placeholder="you@uni.edu"
                             value={form.email}
                             onChange={change('email')}
@@ -97,30 +87,24 @@ export default function ProfileForm({ user }) {
             </fieldset>
 
             {/* Academic Information */}
-            <fieldset className="p-6 rounded-[20px] space-y-5"
-                style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                }}>
-                <legend className="text-xs font-bold uppercase tracking-[0.2em] px-2" style={{ color: 'rgba(245, 246, 250, 0.5)' }}>
+            <fieldset className="p-6 rounded-[20px] space-y-5 bg-white border border-gray-200 shadow-sm">
+                <legend className="text-xs font-bold uppercase tracking-[0.2em] px-2 text-[#3E4A56]">
                     Academic Information
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                        <label className="text-xs text-white/60 uppercase tracking-wide font-medium">Department</label>
+                        <label className="text-xs text-[#1C2A59] uppercase tracking-wide font-bold">Department</label>
                         <input
                             className={inputClass}
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                             placeholder="e.g. Computer Science"
                             value={form.department}
                             onChange={change('department')}
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-xs text-white/60 uppercase tracking-wide font-medium">Student / Staff ID</label>
+                        <label className="text-xs text-[#1C2A59] uppercase tracking-wide font-bold">Student / Staff ID</label>
                         <input
                             className={inputClass}
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                             placeholder="e.g. 2021IT0123"
                             value={form.studentId}
                             onChange={change('studentId')}
@@ -130,19 +114,14 @@ export default function ProfileForm({ user }) {
             </fieldset>
 
             {/* Contact Information */}
-            <fieldset className="p-6 rounded-[20px] space-y-5"
-                style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                }}>
-                <legend className="text-xs font-bold uppercase tracking-[0.2em] px-2" style={{ color: 'rgba(245, 246, 250, 0.5)' }}>
+            <fieldset className="p-6 rounded-[20px] space-y-5 bg-white border border-gray-200 shadow-sm">
+                <legend className="text-xs font-bold uppercase tracking-[0.2em] px-2 text-[#3E4A56]">
                     Contact Information
                 </legend>
                 <div className="max-w-md space-y-2">
-                    <label className="text-xs text-white/60 uppercase tracking-wide font-medium">Phone Number</label>
+                    <label className="text-xs text-[#1C2A59] uppercase tracking-wide font-bold">Phone Number</label>
                     <input
                         className={inputClass}
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                         placeholder="+94 7X XXX XXXX"
                         value={form.phone}
                         onChange={change('phone')}
@@ -155,11 +134,8 @@ export default function ProfileForm({ user }) {
                 <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                    style={{
-                        background: 'linear-gradient(135deg, #F06414 0%, #D4AF37 100%)',
-                        boxShadow: '0 8px 20px rgba(240, 100, 20, 0.35)',
-                    }}>
+                    className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-md bg-[#1C2A59] hover:bg-[#1a254d]"
+                >
                     {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                     {saving ? 'Saving...' : 'Save Changes'}
                 </button>

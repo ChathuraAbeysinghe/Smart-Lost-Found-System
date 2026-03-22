@@ -27,7 +27,7 @@ export default function HomePage() {
                     marginTop: '60px' // Offset for fixed navbar
                 }}>
                 {/* Light Glass Overlay for readability but keeping the bright theme */}
-                <div className="absolute inset-0 z-0 bg-white/85 backdrop-blur-[4px]"></div>
+                <div className="absolute inset-0 z-0 bg-white/70 backdrop-blur-[1px]"></div>
 
                 <div className="relative z-10 w-full max-w-7xl mx-auto px-4 lg:px-8 text-center sm:text-left pt-12 pb-20">
                     <div className="inline-block px-4 py-1.5 rounded-full bg-[#1C2A59]/10 border border-[#1C2A59]/20 mb-6">
