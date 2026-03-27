@@ -38,18 +38,7 @@ export async function GET(request) {
             const messages = await Message.find({ contactId })
                 .populate('senderId', 'name email role')
                 .sort({ createdAt: 1 })
-
-            // Format messages to ensure all required fields are present
-            const formattedMessages = messages.map(msg => ({
-                _id: msg._id,
-                message: msg.message,
-                senderName: msg.senderName || msg.senderId?.name || 'Unknown',
-                senderRole: msg.senderRole || 'user',
-                senderId: msg.senderId,
-                createdAt: msg.createdAt,
-                read: msg.read,
-                readAt: msg.readAt,
-            }))
+                .lean()
 
             // Mark messages as read for current user
             if (decoded.id) {
@@ -59,7 +48,7 @@ export async function GET(request) {
                 )
             }
 
-            return NextResponse.json({ contact, messages: formattedMessages })
+            return NextResponse.json({ contact, messages })
         }
 
         // List contacts
@@ -75,22 +64,7 @@ export async function GET(request) {
             .sort({ lastMessageAt: -1, createdAt: -1 })
             .lean()
 
-        // Add unread count for each contact
-        const contactsWithUnread = await Promise.all(
-            contacts.map(async (contact) => {
-                const unreadCount = await Message.countDocuments({
-                    contactId: contact._id,
-                    recipientId: decoded.id,
-                    read: false,
-                })
-                return {
-                    ...contact,
-                    unreadCount,
-                }
-            })
-        )
-
-        return NextResponse.json({ contacts: contactsWithUnread })
+        return NextResponse.json({ contacts })
     } catch (err) {
         console.error('[AdminContact GET]', err)
         return NextResponse.json({ error: 'Server error' }, { status: 500 })

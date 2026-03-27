@@ -49,18 +49,7 @@ export async function GET(request) {
         const messages = await Message.find(query)
             .populate('senderId', 'name email')
             .sort({ createdAt: 1 })
-
-        // Format messages to ensure all necessary fields are present
-        const formattedMessages = messages.map(msg => ({
-            _id: msg._id,
-            message: msg.message,
-            senderName: msg.senderName || msg.senderId?.name || 'Unknown',
-            senderRole: msg.senderRole || 'user',
-            senderId: msg.senderId,
-            createdAt: msg.createdAt,
-            read: msg.read,
-            readAt: msg.readAt,
-        }))
+            .lean()
 
         // Mark messages as read for the current user
         await Message.updateMany(
@@ -68,7 +57,7 @@ export async function GET(request) {
             { read: true, readAt: new Date() }
         )
 
-        return NextResponse.json({ messages: formattedMessages })
+        return NextResponse.json({ messages })
     } catch (err) {
         console.error('[Messages GET]', err)
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
@@ -154,19 +143,7 @@ export async function POST(request) {
             const populatedMessage = await Message.findById(newMessage._id)
                 .populate('senderId', 'name email')
 
-            const formattedMessage = {
-                _id: populatedMessage._id,
-                message: populatedMessage.message,
-                senderName: populatedMessage.senderName || populatedMessage.senderId?.name || 'Unknown',
-                senderRole: populatedMessage.senderRole || 'user',
-                senderId: populatedMessage.senderId,
-                createdAt: populatedMessage.createdAt,
-                read: populatedMessage.read,
-                readAt: populatedMessage.readAt,
-                contactId: populatedMessage.contactId,
-            }
-
-            return NextResponse.json({ message: formattedMessage }, { status: 201 })
+            return NextResponse.json({ message: populatedMessage }, { status: 201 })
         }
 
         // Handle claim-based message
@@ -220,19 +197,7 @@ export async function POST(request) {
             const populatedMessage = await Message.findById(newMessage._id)
                 .populate('senderId', 'name email')
 
-            const formattedMessage = {
-                _id: populatedMessage._id,
-                message: populatedMessage.message,
-                senderName: populatedMessage.senderName || populatedMessage.senderId?.name || 'Unknown',
-                senderRole: populatedMessage.senderRole || 'user',
-                senderId: populatedMessage.senderId,
-                createdAt: populatedMessage.createdAt,
-                read: populatedMessage.read,
-                readAt: populatedMessage.readAt,
-                claimId: populatedMessage.claimId,
-            }
-
-            return NextResponse.json({ message: formattedMessage }, { status: 201 })
+            return NextResponse.json({ message: populatedMessage }, { status: 201 })
         }
     } catch (err) {
         console.error('[Messages POST]', err)
