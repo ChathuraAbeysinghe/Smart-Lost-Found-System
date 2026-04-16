@@ -9,7 +9,8 @@ import Notification from '@/models/Notification'
 import AuditLog from '@/models/AuditLog'
 import { verifyToken } from '@/lib/auth'
 import { computeMatchScore } from '@/lib/aiEngine'
-import { analyzeImageFromUrl, mergeKeywordLists } from '@/lib/imageAI'
+import { mergeKeywordLists } from '@/lib/imageAI'
+import { analyzeItemImageWithGroq } from '@/lib/groqItemAI'
 
 const ALLOWED_CATEGORIES = new Set(['Electronics', 'Books', 'Clothing', 'Keys', 'ID Card', 'Bag', 'Jewelry', 'Sports', 'Other'])
 
@@ -277,8 +278,8 @@ export async function POST(request) {
         let aiSourceLabel = ''
         try {
             // Always run server-side scan so full AI description is generated and stored privately.
-            aiData = await analyzeImageFromUrl(photoUrl)
-            aiSourceLabel = String(aiData?.source || 'huggingface')
+            aiData = await analyzeItemImageWithGroq(photoUrl, { itemType: 'found' })
+                aiSourceLabel = String(aiData?.source || aiData?.aiSource || 'groq')
         } catch (aiErr) {
             console.warn('[Found Item AI Fallback]', aiErr.message)
             aiData = ai || null
