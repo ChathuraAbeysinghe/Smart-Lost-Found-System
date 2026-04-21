@@ -64,6 +64,7 @@ const ClaimRequestSchema = new mongoose.Schema({
 
     // Pickup info
     pickupScheduledAt: { type: Date },
+    pickupTimeSlot: { type: String, default: '' },
     completedAt: { type: Date },
 }, { timestamps: true })
 
