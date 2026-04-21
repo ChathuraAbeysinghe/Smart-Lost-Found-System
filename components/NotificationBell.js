@@ -53,10 +53,24 @@ export default function NotificationBell() {
         } catch { /* silent */ }
     }
 
+    const handleMarkRead = async (id) => {
+        try {
+            await fetch('/api/notifications', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'mark_read', notificationId: id }),
+                credentials: 'include',
+            })
+            setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n))
+            setUnreadCount(prev => Math.max(0, prev - 1))
+        } catch { /* silent */ }
+    }
+
     const handleDismiss = async (e, id) => {
         e.preventDefault()
         e.stopPropagation()
         try {
+            const notif = notifications.find(n => n._id === id)
             await fetch('/api/notifications', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -64,7 +78,9 @@ export default function NotificationBell() {
                 credentials: 'include',
             })
             setNotifications(prev => prev.filter(n => n._id !== id))
-            setUnreadCount(prev => Math.max(0, prev - 1))
+            if (notif && !notif.read) {
+                setUnreadCount(prev => Math.max(0, prev - 1))
+            }
         } catch { /* silent */ }
     }
 
@@ -163,8 +179,11 @@ export default function NotificationBell() {
                                     <Link
                                         key={n._id}
                                         href={`/found-items/${foundId}`}
-                                        onClick={() => setOpen(false)}
-                                        className="flex gap-3 px-5 py-3.5 transition-colors hover:bg-white/5 relative group border-b"
+                                        onClick={() => {
+                                            if (!n.read) handleMarkRead(n._id)
+                                            setOpen(false)
+                                        }}
+                                        className={`flex gap-3 px-5 py-3.5 transition-colors relative group border-b ${n.read ? 'hover:bg-white/5' : 'hover:bg-white/8 bg-white/[0.03]'}`}
                                         style={{ borderBottomColor: 'rgba(255,255,255,0.03)' }}
                                     >
                                         {/* Unread indicator */}
@@ -189,7 +208,7 @@ export default function NotificationBell() {
                                         {/* Content */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between gap-2 mb-0.5">
-                                                <h4 className={`text-xs font-bold truncate ${n.read ? 'text-white/70' : 'text-white'}`}>
+                                                <h4 className={`text-xs font-bold truncate ${n.read ? 'text-white/50' : 'text-white'}`}>
                                                     {n.title}
                                                 </h4>
                                                 <div className="flex items-center gap-2 shrink-0">
@@ -204,8 +223,8 @@ export default function NotificationBell() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <p className="text-[11px] leading-relaxed line-clamp-2 mb-1"
-                                                style={{ color: 'rgba(245, 246, 250, 0.5)' }}>
+                                            <p className={`text-[11px] leading-relaxed line-clamp-2 mb-1`}
+                                                style={{ color: n.read ? 'rgba(245, 246, 250, 0.35)' : 'rgba(245, 246, 250, 0.6)' }}>
                                                 {n.message}
                                             </p>
                                             <div className="flex items-center gap-1 text-[10px]"

@@ -21,7 +21,7 @@ export async function GET() {
                 department: 'IT Administration',
                 status: 'active',
             },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
         )
         return NextResponse.json({ message: 'Admin ready! Login with campusId: admin, password: A123456b' })
     } catch (err) {

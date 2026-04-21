@@ -32,8 +32,14 @@ export default function UserDashboard() {
             .catch(() => { });
     }, [user, isRestricted]);
 
+    useEffect(() => {
+        if (!authLoading && !user) {
+            router.push('/login');
+        }
+    }, [authLoading, user, router]);
+
     if (authLoading) return <div className="min-h-screen" style={{ backgroundColor: '#F4F5F7' }} />;
-    if (!user) { router.push('/login'); return null; }
+    if (!user) return null;
 
     const activeClaimsCount = myClaims.filter(c => c.status !== 'rejected').length;
     const latestClaim = myClaims[0] || null;

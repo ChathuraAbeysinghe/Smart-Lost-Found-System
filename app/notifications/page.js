@@ -277,6 +277,7 @@ export default function NotificationsPage() {
     }
 
     const handleDismiss = async (id) => {
+        const notif = notifications.find(n => n._id === id)
         await fetch('/api/notifications', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -284,6 +285,9 @@ export default function NotificationsPage() {
             credentials: 'include',
         })
         setNotifications(prev => prev.filter(n => n._id !== id))
+        if (notif && !notif.read) {
+            setUnreadCount(c => Math.max(0, c - 1))
+        }
     }
 
     const handleMarkAllRead = async () => {
