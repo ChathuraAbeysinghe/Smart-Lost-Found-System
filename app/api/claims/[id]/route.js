@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import ClaimRequest from '@/models/ClaimRequest'
+import Notification from '@/models/Notification'
 import { verifyToken } from '@/lib/auth'
 
 export async function GET(request, { params }) {
@@ -79,6 +80,76 @@ export async function PATCH(request, { params }) {
                 })
                 claim.trackingHistory.push({ status: 'Updated', note: 'Claim details updated by claimant', updatedBy: decoded.name })
                 await claim.save()
+                const updated = await ClaimRequest.findById(claim._id)
+                    .populate('lostItemId').populate('foundItemId').populate('claimantId', '-password').lean()
+                return NextResponse.json({ claim: updated })
+            }
+
+            if (body.action === 'schedule_pickup') {
+                if (claim.status !== 'approved') {
+                    return NextResponse.json({ error: 'Pickup can only be scheduled after approval' }, { status: 400 })
+                }
+
+                const { pickupDate, pickupTimeSlot } = body
+                if (!pickupDate || !pickupTimeSlot) {
+                    return NextResponse.json({ error: 'Pickup date and time slot are required' }, { status: 400 })
+                }
+
+                const scheduledDate = new Date(pickupDate)
+                if (Number.isNaN(scheduledDate.getTime())) {
+                    return NextResponse.json({ error: 'Invalid pickup date' }, { status: 400 })
+                }
+
+                scheduledDate.setHours(0, 0, 0, 0)
+
+                claim.status = 'pickup_scheduled'
+                claim.pickupScheduledAt = scheduledDate
+                claim.pickupTimeSlot = pickupTimeSlot
+                claim.trackingHistory.push({
+                    status: 'Pickup Scheduled',
+                    note: `Pickup scheduled for ${scheduledDate.toLocaleDateString('en-US')} at ${pickupTimeSlot}`,
+                    updatedBy: decoded.name,
+                })
+                await claim.save()
+
+                await Notification.create({
+                    userId: claim.claimantId?._id || claim.claimantId,
+                    type: 'claim_update',
+                    title: 'Pickup Scheduled',
+                    message: `Your pickup for "${claim.foundItemId?.title || 'the claimed item'}" is scheduled for ${scheduledDate.toLocaleDateString('en-US')} at ${pickupTimeSlot}.`,
+                    foundItemId: claim.foundItemId?._id || claim.foundItemId,
+                    claimId: claim._id,
+                })
+
+                const updated = await ClaimRequest.findById(claim._id)
+                    .populate('lostItemId').populate('foundItemId').populate('claimantId', '-password').lean()
+                return NextResponse.json({ claim: updated })
+            }
+
+            if (body.action === 'complete_pickup') {
+                if (claim.status !== 'pickup_scheduled') {
+                    return NextResponse.json({ error: 'Pickup can only be completed after it is scheduled' }, { status: 400 })
+                }
+
+                const completedAt = new Date()
+                claim.status = 'completed'
+                claim.completedAt = completedAt
+                claim.trackingHistory.push({
+                    status: 'Completed',
+                    note: 'Item pickup confirmed by claimant',
+                    updatedBy: decoded.name,
+                })
+                await claim.save()
+
+                await Notification.create({
+                    userId: claim.claimantId?._id || claim.claimantId,
+                    type: 'claim_update',
+                    title: 'Pickup Confirmed',
+                    message: `You confirmed pickup for "${claim.foundItemId?.title || 'the claimed item'}". This claim is now marked as completed.`,
+                    foundItemId: claim.foundItemId?._id || claim.foundItemId,
+                    claimId: claim._id,
+                })
+
                 const updated = await ClaimRequest.findById(claim._id)
                     .populate('lostItemId').populate('foundItemId').populate('claimantId', '-password').lean()
                 return NextResponse.json({ claim: updated })
