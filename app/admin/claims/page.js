@@ -19,6 +19,7 @@ function StatusPill({ status }) {
         ai_matched: { label: 'AI Matched', bg: '#e0e7ff', color: '#1C2A59', border: 'transparent' },
         admin_review: { label: 'Info Requested', bg: '#ffedd5', color: '#f97316', border: 'transparent' },
         approved: { label: 'Approved', bg: '#d1fae5', color: '#10B981', border: 'transparent' },
+        pickup_scheduled: { label: 'Pickup Scheduled', bg: '#ccfbf1', color: '#0F766E', border: 'transparent' },
         rejected: { label: 'Rejected', bg: '#fee2e2', color: '#ef4444', border: 'transparent' },
         completed: { label: 'Completed', bg: '#d1fae5', color: '#10B981', border: 'transparent' },
     }
@@ -252,7 +253,7 @@ function ClaimCard({ claim, onAction, actionLoading }) {
     const [expanded, setExpanded] = useState(false)
     const [confirmAction, setConfirmAction] = useState(null)
     const [showChat, setShowChat] = useState(false)
-    const isDone = ['approved', 'rejected', 'completed'].includes(claim.status)
+    const isDone = ['approved', 'pickup_scheduled', 'rejected', 'completed'].includes(claim.status)
 
     return (
         <>
